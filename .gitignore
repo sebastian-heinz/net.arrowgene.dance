@@ -1,0 +1,19 @@
+# folders
+/.idea/
+/.gradle/
+/classes/
+/logs/
+/.vscode/
+/**/build/
+/**/out/
+/**/bin/
+/**/.settings/
+
+# files
+db.db3
+editor.properties
+*.classpath
+*.project
+*.DS_Store
+dance-server*.jar
+*.iml

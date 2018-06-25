@@ -1,0 +1,80 @@
+group 'net.arrowgene.dance'
+version gradle.ext.dance_version
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "net.arrowgene.dance.Starter"
+run {
+    args += 'server'
+}
+sourceCompatibility = 1.7
+
+jar {
+    manifest {
+        attributes 'Name': 'arrowgene/dance/',
+            'Specification-Title': 'Server for Dance! Online',
+            'Specification-Version': version,
+            'Specification-Vendor': gradle.ext.dance_vendor,
+            'Implementation-Title': 'arrowgene.dance',
+            'Implementation-Version': version,
+            'Implementation-Vendor': gradle.ext.dance_vendor,
+            'Main-Class': 'net.arrowgene.dance.Starter'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = 'bin/'
+        output.classesDir = 'bin/'
+    }
+}
+
+dependencies {
+    compile project(':server')
+    compile project(':editor')
+    compile project(':query')
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+/*
+* This task builds and bundles the project to a single executable .jar-file.
+*
+* Run it with 'gradle fatJar' or 'gradlew fatJar'.
+* The file can be found in './dance-bundle-VERSION.jar'.
+*
+* For arguments used in this task see the following documentation:
+* https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html
+*
+* This task was tested with gradle 3.4.1
+*
+* Notice:
+* The 'manifest'-property is 'incubating' so it may change in future gradle-versions.
+*/
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Name': 'arrowgene/dance/',
+            'Specification-Title': 'Server for Dance! Online',
+            'Specification-Version': version,
+            'Specification-Vendor': gradle.ext.dance_vendor,
+            'Implementation-Title': 'arrowgene.dance',
+            'Implementation-Version': version,
+            'Implementation-Vendor': gradle.ext.dance_vendor,
+            'Main-Class': 'net.arrowgene.dance.Starter'
+    }
+    if (project.hasProperty('server')) {
+        // `gradle fatjar -Pserver`
+        // Create a fatJar without version number in the name.
+        archiveName = project.name + ".jar"
+    } else {
+        baseName = project.name
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    destinationDir = file("$rootDir/")
+    with jar
+}

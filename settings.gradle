@@ -1,0 +1,26 @@
+/*
+ * Gets the version name from the latest Git tag
+ */
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+
+rootProject.name = 'dance-server'
+
+gradle.ext.dance_version = getVersionName()
+gradle.ext.dance_vendor = "Arrowgene Team"
+
+
+include 'server'
+include 'bot'
+include 'library'
+include 'editor'
+include 'database'
+include 'query'
+include 'log'
