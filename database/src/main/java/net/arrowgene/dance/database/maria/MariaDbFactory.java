@@ -3,7 +3,6 @@
  *
  * net.arrowgene.dance is a server implementation for the game "Dance! Online".
  * Copyright (C) 2013-2018  Sebastian Heinz (github: sebastian-heinz)
- * Copyright (C) 2013-2018  Daniel Neuendorf
  *
  * Github: https://github.com/Arrowgene/net.arrowgene.dance
  * Web: https://arrowgene.net
@@ -22,8 +21,11 @@
  * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package net.arrowgene.dance.log;
+package net.arrowgene.dance.database.maria;
 
-public interface LogListener {
-    void writeLog(Log log);
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class MariaDbFactory {
+    private static final Logger logger = LogManager.getLogger(MariaDbFactory.class);
 }

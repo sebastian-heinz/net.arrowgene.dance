@@ -25,9 +25,7 @@
 package net.arrowgene.dance.database.sqlite;
 
 import net.arrowgene.dance.database.Database;
-import net.arrowgene.dance.database.DbLogger;
 import net.arrowgene.dance.database.sqlite.modules.*;
-import net.arrowgene.dance.log.ILogger;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountSettings;
 import net.arrowgene.dance.library.models.channel.ChannelDetails;
@@ -41,6 +39,8 @@ import net.arrowgene.dance.library.models.mail.Mail;
 import net.arrowgene.dance.library.models.song.FavoriteSong;
 import net.arrowgene.dance.library.models.song.Song;
 import net.arrowgene.dance.library.models.wedding.WeddingRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.sql.ResultSet;
@@ -49,6 +49,8 @@ import java.sql.Statement;
 import java.util.List;
 
 public class SQLiteDb extends Database {
+
+    private static final Logger logger = LogManager.getLogger(SQLiteDb.class);
 
     private SQLiteController controller;
     private SQLiteFactory factory;
@@ -66,20 +68,8 @@ public class SQLiteDb extends Database {
     private SQLiteSong song;
     private SQLiteWedding wedding;
 
-    /**
-     * Create an Instance with its own simple logger.
-     */
     public SQLiteDb() {
-        this(new DbLogger());
-    }
-
-    /**
-     * Create an Instance with a given logger.
-     *
-     * @param logger
-     */
-    public SQLiteDb(ILogger logger) {
-        super(logger);
+        super();
 
         this.factory = new SQLiteFactory();
 
@@ -89,8 +79,8 @@ public class SQLiteDb extends Database {
             initDB = true;
         }
 
-        controller = new SQLiteController("db.db3", logger);
-        controller.initDBConnection();
+        controller = new SQLiteController("db.db3");
+        controller.initialize();
 
         if (initDB) {
             initDatabase();
@@ -112,7 +102,7 @@ public class SQLiteDb extends Database {
     }
 
     private void initDatabase() {
-        super.logger.writeDebug("initialize SQLiteDb");
+        logger.info("initialize SQLiteDb");
 
         importFile("ag_structure.sql");
         importFile("ag_items.sql");

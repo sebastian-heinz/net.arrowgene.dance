@@ -280,6 +280,13 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
     }
 
     private void initServer() {
+        // TODO
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+           //    SQLiteController.this.close();
+            }
+        });
+
         this.logger = new ServerLogger(this.serverConfig);
         Thread.setDefaultUncaughtExceptionHandler(this);
 

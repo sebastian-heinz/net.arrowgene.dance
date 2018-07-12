@@ -24,39 +24,38 @@
 
 package net.arrowgene.dance.database.sqlite;
 
-import net.arrowgene.dance.log.ILogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.*;
 
 public class SQLiteController {
+
+    private static final Logger logger = LogManager.getLogger(SQLiteController.class);
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
+
     private Connection connection;
-    private String DB_PATH = "data.db3";
-    private ILogger logger;
+    private String databasePath;
 
-    protected SQLiteController(ILogger logger) {
-        this.logger = logger;
-    }
-
-    public SQLiteController(String DB_PATH, ILogger logger) {
-        this.DB_PATH = DB_PATH;
-        this.logger = logger;
+    public SQLiteController(String databasePath) {
+        this.databasePath = databasePath;
     }
 
     public Statement createStatement() {
         try {
-            return this.connection.createStatement(1003, 1007);
-        } catch (SQLException var2) {
-            var2.printStackTrace();
+            return this.connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        } catch (Exception ex) {
+            logger.error(ex);
             return null;
         }
     }
 
     public PreparedStatement createPreparedStatement(String sql) {
         try {
-            return this.connection.prepareStatement(sql, 1003, 1007);
-        } catch (SQLException var2) {
-            var2.printStackTrace();
+            return this.connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        } catch (Exception ex) {
+            logger.error(ex);
             return null;
         }
     }
@@ -74,80 +73,46 @@ public class SQLiteController {
             if (rs.next()) {
                 autoInc = rs.getInt("last_insert_rowid()");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            logger.error(ex);
         }
         return autoInc;
     }
 
-
-    public void clear() {
-        File dbFile = new File(this.DB_PATH);
+    public void delete() {
+        File dbFile = new File(databasePath);
         if (dbFile.exists()) {
             dbFile.delete();
         }
-
     }
 
-    public boolean initDBConnection() {
-        boolean ret = false;
-
+    public boolean initialize() {
+        boolean success;
         try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException var1) {
-            this.logger.writeLog(var1);
-            this.logger.writeDebug("DB:error while loading jdbc-drivers");
+            Class.forName(JDBC_DRIVER);
+            connection = DriverManager.getConnection(getConnectionString());
+            success = true;
+        } catch (Exception ex) {
+            logger.error(ex);
+            success = false;
         }
-
-        try {
-            boolean e = false;
-            if (this.connection != null) {
-                return ret;
-            }
-
-            File dbFile = new File(this.DB_PATH);
-            if (!dbFile.exists()) {
-                e = true;
-            }
-
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.DB_PATH);
-            if (!this.connection.isClosed()) {
-                ret = true;
-            }
-
-            if (ret && e) {
-                this.create();
-            }
-        } catch (SQLException var4) {
-            throw new RuntimeException(var4);
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                SQLiteController.this.close();
-            }
-        });
-        return ret;
-    }
-
-    protected void create() {
-    }
-
-    protected void defaultValues() {
+        return success;
     }
 
     public void close() {
         try {
-            if (!this.connection.isClosed() && this.connection != null) {
-                this.connection.close();
-                if (this.connection.isClosed()) {
-                    this.logger.writeDebug("DB:conenction closed");
-                    //           Console.log("DB", "connection closed", 8);
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                if (connection.isClosed()) {
+                    logger.info("SQLite Connection Closed");
                 }
             }
-        } catch (SQLException var2) {
-            var2.printStackTrace();
+        } catch (Exception ex) {
+            logger.error(ex);
         }
     }
 
+    private String getConnectionString() {
+        return String.format("jdbc:sqlite:%s", databasePath);
+    }
 }

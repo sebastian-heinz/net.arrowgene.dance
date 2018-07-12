@@ -30,8 +30,10 @@ sourceSets {
 }
 
 dependencies {
+    compile 'org.apache.logging.log4j:log4j-core:2.11.0'
+    compile 'org.apache.logging.log4j:log4j-api:2.11.0'
     compile 'org.xerial:sqlite-jdbc:3.21.0.1'
+    compile 'org.mariadb.jdbc:mariadb-java-client:2.2.5'
     compile project(':library')
-    compile project(':log')
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

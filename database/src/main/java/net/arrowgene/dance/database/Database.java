@@ -24,7 +24,6 @@
 
 package net.arrowgene.dance.database;
 
-import net.arrowgene.dance.log.ILogger;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountSettings;
 import net.arrowgene.dance.library.models.account.AccountStateType;
@@ -45,10 +44,8 @@ import java.util.List;
 
 public abstract class Database {
 
-    protected ILogger logger;
+    public Database() {
 
-    public Database(ILogger logger) {
-        this.logger = logger;
     }
 
     public abstract boolean insertAccount(Account account);
