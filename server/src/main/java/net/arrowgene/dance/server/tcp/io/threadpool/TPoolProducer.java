@@ -25,15 +25,18 @@
 package net.arrowgene.dance.server.tcp.io.threadpool;
 
 
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.tcp.io.TcpServerIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class TPoolProducer implements Runnable {
+
+    private static final Logger logger = LogManager.getLogger(TPoolProducer.class);
 
     private static final int joinTimeoutMS = 10;
 
@@ -53,20 +56,20 @@ public class TPoolProducer implements Runnable {
 
     public void start() {
         if (!this.isRunning) {
-            this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "start", "Starting TPoolProducer [" + this.number + "] ...");
+            logger.info(String.format("Starting TPoolProducer [%d] ...", number));
             this.isRunning = true;
             thread = new Thread(this);
             thread.setName("TPoolProducer [" + this.number + "]");
             thread.start();
         } else {
-            this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "start", "TPoolProducer [" + this.number + "] already started");
+            logger.info(String.format("TPoolProducer [%d] already started", number));
         }
     }
 
     @SuppressWarnings("Duplicates")
     public void stop() {
         if (this.isRunning) {
-            this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "stop", "Stopping TPoolProducer [" + this.number + "] ...");
+            logger.info(String.format("Stopping TPoolProducer [%d] ...", number));
             this.isRunning = false;
             try {
                 this.thread.join(joinTimeoutMS);
@@ -74,16 +77,16 @@ public class TPoolProducer implements Runnable {
                     this.thread.interrupt();
                 }
             } catch (InterruptedException e) {
-                this.server.getLogger().writeLog(e);
+                logger.error(e);
             }
         } else {
-            this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "stop", "TPoolProducer [" + this.number + "] already stopped");
+            logger.info(String.format("TPoolProducer [%d] already stopped", number));
         }
     }
 
     @Override
     public void run() {
-        this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "run", "Client Manager started");
+        logger.info(String.format("TPoolProducer [%d] started", number));
         while (this.isRunning) {
             TPoolClient client = null;
             try {
@@ -93,9 +96,9 @@ public class TPoolProducer implements Runnable {
                 client = this.manager.getIdleClients().take();
             } catch (InterruptedException e) {
                 this.isRunning = false;
-                this.server.getLogger().writeLog(e);
+                logger.error(e);
             } catch (Exception e) {
-                this.server.getLogger().writeLog(e);
+                logger.error(e);
             }
             if (client != null) {
                 if (client.getAlive()) {
@@ -107,7 +110,7 @@ public class TPoolProducer implements Runnable {
                     } else if (pst == PacketStateType.IDLE) {
                         long duration = DanceServer.getUnixTimeNow() - client.getLastPacketReceived();
                         if (duration > this.server.getConfig().getMaxNetworkInactivitySeconds()) {
-                            this.server.getLogger().writeLog(LogType.CLIENT, String.format("Killing client due to no network activity for %s seconds", duration), client);
+                            logger.warn(String.format("Killing client due to no network activity for %s seconds (%s)", duration, client));
                             this.manager.disconnect(client);
                         } else {
                             this.manager.getIdleClients().add(client);
@@ -117,17 +120,17 @@ public class TPoolProducer implements Runnable {
                     } else if (pst == PacketStateType.DISCONNECTED) {
                         this.manager.disconnect(client);
                     } else {
-                        this.server.getLogger().writeLog(LogType.ERROR, "TPoolProducer", "run", "Entered unhandled case");
+                        logger.error(String.format("Entered unhandled case (%s)", client));
                         this.manager.disconnect(client);
                     }
                 } else {
                     this.manager.disconnect(client);
                 }
             } else {
-                this.server.getLogger().writeLog(LogType.ERROR, "TPoolProducer", "run", "Encountered null client.");
+                logger.error("Encountered null client.");
             }
         }
-        this.server.getLogger().writeLog(LogType.SERVER, "TPoolProducer", "run", "Client Manager stopped");
+        logger.info(String.format("TPoolProducer [%d] stopped", number));
     }
 
     private PacketState readPacketHeader(TPoolClient client) {
@@ -144,14 +147,16 @@ public class TPoolProducer implements Runnable {
                     pst = PacketStateType.DISCONNECTED;
                 } else {
                     // TODO consider fragmented packages? maybe we receive only 2 bytes of the header on this read?
-                    this.server.getLogger().writeDataLog("Invalid Header Log", readBytes, header, client);
+                    // TODO log sizes & data?
+                    logger.error(String.format("Invalid Header (%s)", client));
                     pst = PacketStateType.ERROR;
                 }
             } else {
                 pst = PacketStateType.IDLE;
             }
         } catch (IOException e) {
-            this.server.getLogger().writeLog(e, client);
+            logger.error(String.format("%s (%s)", e.getMessage(), client));
+            logger.error(e);
             pst = PacketStateType.ERROR;
         }
         return new PacketState(header, pst);

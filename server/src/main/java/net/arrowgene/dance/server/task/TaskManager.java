@@ -27,8 +27,12 @@ package net.arrowgene.dance.server.task;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
 import net.arrowgene.dance.server.client.DanceClient;
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.server.task.tasks.*;
+import net.arrowgene.dance.server.task.tasks.CollectGarbage;
+import net.arrowgene.dance.server.task.tasks.WorldSave;
+import net.arrowgene.dance.server.task.tasks.WriteDebugInfo;
+import net.arrowgene.dance.server.task.tasks.WriteProcessInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -39,6 +43,9 @@ import java.util.concurrent.ScheduledFuture;
  * Schedules execution of tasks.
  */
 public class TaskManager extends ServerComponent {
+
+
+    private static final Logger logger = LogManager.getLogger(TaskManager.class);
 
     private HashMap<String, ScheduledFuture> schedules;
     private ScheduledExecutorService executor;
@@ -58,7 +65,7 @@ public class TaskManager extends ServerComponent {
      */
     public String schedule(Task task) {
         if (this.schedules.containsKey(task.getId())) {
-            getLogger().writeLog(LogType.WARNING, "TaskManager", "schedule", "A task with the id " + task.getId() + " already exists, will be overwritten.");
+            logger.info(String.format("Task with id '%s' already exists, will be overwritten.", task.getId()));
             ScheduledFuture<?> existingTask = this.schedules.get(task.getId());
             existingTask.cancel(true);
         }
@@ -79,11 +86,11 @@ public class TaskManager extends ServerComponent {
      */
     public void cancel(String taskId) {
         if (this.schedules.containsKey(taskId)) {
-            getLogger().writeLog(LogType.SERVER, "TaskManager", "schedule", "Cancelling task: " + taskId);
+            logger.info(String.format("Cancelling task: %s", taskId));
             ScheduledFuture<?> existingTask = this.schedules.remove(taskId);
             existingTask.cancel(true);
         } else {
-            getLogger().writeLog(LogType.WARNING, "TaskManager", "schedule", "Task: " + taskId + " does't exist");
+            logger.info(String.format("Task: %s does't exist", taskId));
         }
     }
 
@@ -92,9 +99,7 @@ public class TaskManager extends ServerComponent {
         this.executor = Executors.newScheduledThreadPool(1);
         this.schedules = new HashMap<>();
 
-        this.schedule(new LogSave(super.server.getServerConfig().getLogPeriodMin(), getLogger()));
         this.schedule(new WorldSave(super.server));
-
         if (super.server.getServerConfig().isDebugMode()) {
             this.schedule(new WriteDebugInfo(super.server));
             this.schedule(new CollectGarbage(super.server));

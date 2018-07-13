@@ -28,10 +28,11 @@ import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.library.models.group.Group;
 import net.arrowgene.dance.library.models.group.GroupMember;
 import net.arrowgene.dance.library.models.group.GroupRights;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,8 @@ public class GroupManager extends ServerComponent {
     public static final int MIN_GROUP_LEVEL = 25;
     public static final int MAX_TITLE_LENGTH = 35;
     public static final int MAX_TEXT_LENGTH = 200;
+
+    private static final Logger logger = LogManager.getLogger(GroupManager.class);
 
     private final Object groupsLock = new Object();
     private final Object groupMembersLock = new Object();
@@ -150,10 +153,10 @@ public class GroupManager extends ServerComponent {
     @Override
     public void writeDebugInfo() {
         synchronized (this.groupsLock) {
-            getLogger().writeLog(LogType.DEBUG, "GroupManager", "writeDebugInfo", "Groups: " + this.groups.size());
+            logger.debug(String.format("Groups: %s", groups.size()));
         }
         synchronized (this.groupMembersLock) {
-            getLogger().writeLog(LogType.DEBUG, "GroupManager", "writeDebugInfo", "Group Members: " + this.groupMembers.size());
+            logger.debug(String.format("Group Members: %s", groupMembers.size()));
         }
     }
 
@@ -342,15 +345,13 @@ public class GroupManager extends ServerComponent {
 
         Character character = super.server.getCharacterManager().getCharacterById(characterId);
         if (character == null) {
-            super.getLogger().writeLog(LogType.GROUP, "GroupManager", "joinGroup",
-                "Character not found: " + characterId);
+            logger.error(String.format("Character not found: %d", characterId));
             return null;
         }
 
         Group group = this.getGroupById(groupId);
         if (group == null) {
-            super.getLogger().writeLog(LogType.GROUP, "GroupManager", "joinGroup",
-                "Group could not be found: " + groupId);
+            logger.error(String.format("Group could not be found: %d", groupId));
             return null;
         }
 
@@ -366,8 +367,7 @@ public class GroupManager extends ServerComponent {
 
         boolean success = super.getDatabase().insertGroupMember(member);
         if (!success) {
-            super.getLogger().writeLog(LogType.GROUP, "GroupManager", "joinGroup",
-                "GroupMember could not be stored for character: " + character.getName());
+            logger.error(String.format("GroupMember could not be stored for character: %s", character.getName()));
             return null;
         }
 

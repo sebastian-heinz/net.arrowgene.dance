@@ -25,7 +25,6 @@
 package net.arrowgene.dance.server.tcp.nio;
 
 import net.arrowgene.dance.library.common.Converter;
-import net.arrowgene.dance.log.Logger;
 import net.arrowgene.dance.server.tcp.TcpClient;
 
 import java.io.IOException;
@@ -37,13 +36,11 @@ public class TcpClientNIO extends TcpClient {
 
     private TcpServerNIO server;
     private SocketChannel socket;
-    private Logger logger;
     private ByteBuffer packetBuffer;
 
-    public TcpClientNIO(TcpServerNIO server, SocketChannel socket, Logger logger) {
+    public TcpClientNIO(TcpServerNIO server, SocketChannel socket) {
         this.server = server;
         this.socket = socket;
-        this.logger = logger;
         this.packetBuffer = null;
     }
 

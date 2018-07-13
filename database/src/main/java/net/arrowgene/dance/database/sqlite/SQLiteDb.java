@@ -42,10 +42,7 @@ import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 public class SQLiteDb extends Database {
@@ -69,23 +66,11 @@ public class SQLiteDb extends Database {
     private SQLiteWedding wedding;
 
     public SQLiteDb() {
-        super();
-
-        this.factory = new SQLiteFactory();
-
-        boolean initDB = false;
-        File dbFile = new File("db.db3");
-        if (!dbFile.exists()) {
-            initDB = true;
-        }
-
         controller = new SQLiteController("db.db3");
-        controller.initialize();
-
-        if (initDB) {
-            initDatabase();
+        if (!controller.initialize()) {
+            logger.fatal("Could not initialize SQLiteDb");
         }
-
+        this.factory = new SQLiteFactory();
         this.account = new SQLiteAccount(this.controller, this.factory);
         this.channel = new SQLiteChannel(this.controller, this.factory);
         this.character = new SQLiteCharacter(this.controller, this.factory);
@@ -101,72 +86,13 @@ public class SQLiteDb extends Database {
         this.wedding = new SQLiteWedding(this.controller, this.factory);
     }
 
-    private void initDatabase() {
-        logger.info("initialize SQLiteDb");
-
-        importFile("ag_structure.sql");
-        importFile("ag_items.sql");
-        importFile("ag_songs.sql");
-        importFile("ag_default.sql");
-    }
-
-    private void importFile(String fileName) {
-
-        // Check if file is present
-        InputStream sqlStructureFile = Database.class.getResourceAsStream(fileName);
-        if (sqlStructureFile != null) {
-            super.logger.writeDebug("Import file " + fileName);
-            StringBuilder sb = new StringBuilder();
-            try {
-                BufferedReader bfReader = new BufferedReader(new InputStreamReader(sqlStructureFile));
-
-                String sCurrentLine;
-                while ((sCurrentLine = bfReader.readLine()) != null) {
-                    sb.append(sCurrentLine + "\n");
-                }
-
-                String[] strSQL = sb.toString().split(";");
-                for (int i = 0; i < strSQL.length; i++) {
-                    if (!strSQL[i].trim().equals("")) {
-                        executeSQL(strSQL[i] + ";");
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                super.logger.writeLog(e);
-            } catch (IOException e) {
-                super.logger.writeLog(e);
-            }
-        } else {
-            System.out.println("Could not find file " + fileName);
-        }
-    }
-
-    private void executeSQL(String sql) {
-        Statement stmt = controller.createStatement();
-
-        try {
-            stmt.execute(sql);
-            stmt.close();
-        } catch (SQLException e) {
-            super.logger.writeLog(e);
-        }
-    }
-
-    public int getAutoInc(Statement stmt) throws SQLException {
-        int inc = 0;
-        ResultSet autoInc = stmt.getGeneratedKeys();
-        inc = autoInc.getInt(1);
-        autoInc.close();
-        return inc;
-    }
-
     @Override
     public boolean insertAccount(Account account) {
         boolean success = true;
         try {
             this.account.insertAccount(account);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -178,7 +104,7 @@ public class SQLiteDb extends Database {
         try {
             this.account.insertPassword(accountName, newPasswordHash);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -190,7 +116,7 @@ public class SQLiteDb extends Database {
         try {
             account = this.account.getAccount(accountName);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return account;
     }
@@ -201,7 +127,7 @@ public class SQLiteDb extends Database {
         try {
             account = this.account.getAccount(accountId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return account;
     }
@@ -212,7 +138,7 @@ public class SQLiteDb extends Database {
         try {
             account = this.account.getAccount(accountName, passwordHash);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return account;
     }
@@ -223,7 +149,7 @@ public class SQLiteDb extends Database {
         try {
             channels = this.channel.getChannels();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return channels;
     }
@@ -234,7 +160,7 @@ public class SQLiteDb extends Database {
         try {
             character = this.character.getCharacter(characterName);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return character;
     }
@@ -245,7 +171,7 @@ public class SQLiteDb extends Database {
         try {
             characters = this.character.getCharactersByUserId(userId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return characters;
     }
@@ -256,7 +182,7 @@ public class SQLiteDb extends Database {
         try {
             character = this.character.getCharacterById(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return character;
     }
@@ -267,7 +193,7 @@ public class SQLiteDb extends Database {
         try {
             this.character.insertCharacter(character);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -279,7 +205,7 @@ public class SQLiteDb extends Database {
         try {
             this.favoriteSong.insertFavoriteSong(favoriteSong);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -291,7 +217,7 @@ public class SQLiteDb extends Database {
         try {
             this.favoriteSong.insertFavoriteSongs(favoriteSongs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -303,7 +229,7 @@ public class SQLiteDb extends Database {
         try {
             favoriteSongs = this.favoriteSong.getFavoriteSongs(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return favoriteSongs;
     }
@@ -314,7 +240,7 @@ public class SQLiteDb extends Database {
         try {
             this.favoriteSong.deleteFavoriteSong(favoriteSongId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -326,7 +252,7 @@ public class SQLiteDb extends Database {
         try {
             this.group.insertGroups(groups);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -338,7 +264,7 @@ public class SQLiteDb extends Database {
         try {
             groups = this.group.getGroups();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return groups;
     }
@@ -349,7 +275,7 @@ public class SQLiteDb extends Database {
         try {
             this.group.insertGroup(group);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -361,7 +287,7 @@ public class SQLiteDb extends Database {
         try {
             this.group.deleteGroup(groupId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -373,7 +299,7 @@ public class SQLiteDb extends Database {
         try {
             this.group.deleteGroups(groups);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -385,7 +311,7 @@ public class SQLiteDb extends Database {
         try {
             this.groupMember.insertGroupMember(groupMember);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -397,7 +323,7 @@ public class SQLiteDb extends Database {
         try {
             this.groupMember.insertGroupMembers(groupMembers);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -409,7 +335,7 @@ public class SQLiteDb extends Database {
         try {
             groupMembers = this.groupMember.getGroupMembers(groupId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return groupMembers;
     }
@@ -420,7 +346,7 @@ public class SQLiteDb extends Database {
         try {
             groupMembers = this.groupMember.getGroupMembers();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return groupMembers;
     }
@@ -431,7 +357,7 @@ public class SQLiteDb extends Database {
         try {
             this.groupMember.deleteGroupMember(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -443,7 +369,7 @@ public class SQLiteDb extends Database {
         try {
             this.groupMember.deleteGroupMembers(groupMembers);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -455,7 +381,7 @@ public class SQLiteDb extends Database {
         try {
             inventoryItem = this.inventoryItem.getInventoryItem(inventoryId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return inventoryItem;
     }
@@ -466,7 +392,7 @@ public class SQLiteDb extends Database {
         try {
             inventoryItems = this.inventoryItem.getInventoryItems(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return inventoryItems;
     }
@@ -477,7 +403,7 @@ public class SQLiteDb extends Database {
         try {
             this.inventoryItem.insertInventoryItem(item);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -489,7 +415,7 @@ public class SQLiteDb extends Database {
         try {
             this.inventoryItem.insertInventoryItems(items);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -501,7 +427,7 @@ public class SQLiteDb extends Database {
         try {
             this.inventoryItem.deleteInventoryItem(inventoryId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -513,7 +439,7 @@ public class SQLiteDb extends Database {
         try {
             this.inventoryItem.deleteInventoryItems(items);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -525,7 +451,7 @@ public class SQLiteDb extends Database {
         try {
             mail = this.mail.getMail(mailId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return mail;
     }
@@ -536,7 +462,7 @@ public class SQLiteDb extends Database {
         try {
             mails = this.mail.getMails(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return mails;
     }
@@ -547,7 +473,7 @@ public class SQLiteDb extends Database {
         try {
             this.mail.insertMail(mail);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -559,7 +485,7 @@ public class SQLiteDb extends Database {
         try {
             this.mail.insertMails(mails);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -571,7 +497,7 @@ public class SQLiteDb extends Database {
         try {
             this.mail.deleteMail(mailId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -583,7 +509,7 @@ public class SQLiteDb extends Database {
         try {
             this.mail.deleteMails(mails);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -595,7 +521,7 @@ public class SQLiteDb extends Database {
         try {
             this.settings.insertSettings(settings);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -607,7 +533,7 @@ public class SQLiteDb extends Database {
         try {
             settings = this.settings.getSettings(userId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return settings;
     }
@@ -618,7 +544,7 @@ public class SQLiteDb extends Database {
         try {
             this.settings.deleteSettings(userId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -630,7 +556,7 @@ public class SQLiteDb extends Database {
         try {
             this.shopItem.insertShopItem(item);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -642,7 +568,7 @@ public class SQLiteDb extends Database {
         try {
             this.shopItem.insertShopItems(items);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -654,7 +580,7 @@ public class SQLiteDb extends Database {
         try {
             shopItem = this.shopItem.getShopItem(itemId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return shopItem;
     }
@@ -665,7 +591,7 @@ public class SQLiteDb extends Database {
         try {
             shopItems = this.shopItem.getShopItems();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return shopItems;
     }
@@ -676,7 +602,7 @@ public class SQLiteDb extends Database {
         try {
             this.shopItem.deleteShopItem(itemId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -688,7 +614,7 @@ public class SQLiteDb extends Database {
         try {
             this.social.insertBuddy(buddy);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -700,7 +626,7 @@ public class SQLiteDb extends Database {
         try {
             this.social.insertBuddies(buddies);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -712,7 +638,7 @@ public class SQLiteDb extends Database {
         try {
             buddies = this.social.getBuddies(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return buddies;
     }
@@ -723,7 +649,7 @@ public class SQLiteDb extends Database {
         try {
             this.social.deleteBuddy(buddyId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -735,7 +661,7 @@ public class SQLiteDb extends Database {
         try {
             this.social.deleteBuddies(buddies);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -747,7 +673,7 @@ public class SQLiteDb extends Database {
         try {
             this.social.insertIgnore(ignored);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -759,7 +685,7 @@ public class SQLiteDb extends Database {
         try {
             buddies = this.social.getIgnored(characterId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return buddies;
     }
@@ -770,7 +696,7 @@ public class SQLiteDb extends Database {
         try {
             this.song.insertSong(song);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -782,7 +708,7 @@ public class SQLiteDb extends Database {
         try {
             this.song.insertSongs(songs);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -794,7 +720,7 @@ public class SQLiteDb extends Database {
         try {
             songs = this.song.getSongs();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return songs;
     }
@@ -805,7 +731,7 @@ public class SQLiteDb extends Database {
         try {
             this.song.deleteSong(songId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -817,7 +743,7 @@ public class SQLiteDb extends Database {
         try {
             this.wedding.insertWeddingRecord(weddingRecord);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -829,7 +755,7 @@ public class SQLiteDb extends Database {
         try {
             this.wedding.insertWeddingRecords(weddingRecords);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -841,7 +767,7 @@ public class SQLiteDb extends Database {
         try {
             weddingRecords = this.wedding.getWeddingRecords();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return weddingRecords;
     }
@@ -852,7 +778,7 @@ public class SQLiteDb extends Database {
         try {
             this.wedding.deleteWeddingRecord(weddingRecordId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;
@@ -864,7 +790,7 @@ public class SQLiteDb extends Database {
         try {
             this.wedding.deleteWeddingRecords(weddingRecords);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
             success = false;
         }
         return success;

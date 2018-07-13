@@ -24,12 +24,12 @@
 
 package net.arrowgene.dance.server.chat;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
 import net.arrowgene.dance.server.chat.commands.ChatCommandMiddleware;
 import net.arrowgene.dance.server.chat.filter.ChatFilterMiddleware;
 import net.arrowgene.dance.server.chat.logger.ChatLoggerMiddleware;
+import net.arrowgene.dance.server.client.DanceClient;
 
 import java.util.ArrayList;
 
@@ -52,7 +52,7 @@ public class ChatManager extends ServerComponent {
     @Override
     public void load() {
         this.middleware.clear();
-        this.middleware.add(new ChatLoggerMiddleware(super.getLogger()));
+        this.middleware.add(new ChatLoggerMiddleware());
         this.middleware.add(new ChatCommandMiddleware(super.server));
         this.middleware.add(new ChatFilterMiddleware());
     }

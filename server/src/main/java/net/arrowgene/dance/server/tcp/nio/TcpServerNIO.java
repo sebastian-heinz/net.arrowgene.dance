@@ -27,10 +27,11 @@ package net.arrowgene.dance.server.tcp.nio;
 
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerConfig;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.tcp.TcpClient;
 import net.arrowgene.dance.server.tcp.TcpServer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -45,6 +46,8 @@ import java.util.LinkedList;
 
 
 public class TcpServerNIO extends TcpServer implements Runnable {
+
+    private static final Logger logger = LogManager.getLogger(TcpServerNIO.class);
 
     private final Object pendingChangesLock = new Object();
     private final Object pendingDataLock = new Object();
@@ -64,7 +67,7 @@ public class TcpServerNIO extends TcpServer implements Runnable {
         this.pendingChanges = new LinkedList<>();
         this.pendingData = new HashMap<>();
         this.serverConfig = server.getServerConfig();
-        this.worker = new PacketWorker(this, super.getLogger());
+        this.worker = new PacketWorker(this);
         this.readBuffer = ByteBuffer.allocate(8192);
     }
 
@@ -80,10 +83,10 @@ public class TcpServerNIO extends TcpServer implements Runnable {
                 this.tcpThread.setName("TcpServerNIO");
                 this.tcpThread.start();
             } catch (IOException e) {
-                super.getLogger().writeLog(e);
+                logger.error(e);
             }
         } else {
-            super.getLogger().writeLog(LogType.WARNING, "TcpServerNIO", "start", "Server already started");
+            logger.warn("Server already started");
         }
     }
 
@@ -96,20 +99,20 @@ public class TcpServerNIO extends TcpServer implements Runnable {
                 this.serverChannel.close();
                 this.selector.close();
             } catch (IOException e) {
-                super.getLogger().writeLog(e);
+                logger.error(e);
             }
         } else {
-            super.getLogger().writeLog(LogType.WARNING, "TcpServerNIO", "stop", "Server already stopped");
+            logger.warn("Server already stopped");
         }
     }
 
     @Override
     public void writeDebugInfo() {
         synchronized (this.pendingChangesLock) {
-            super.getLogger().writeLog(LogType.DEBUG, "TcpServerNIO", "writeDebugInfo", "Pending Changes: " + this.pendingChanges.size());
+            logger.debug(String.format("Pending Changes: %d", pendingChanges.size()));
         }
         synchronized (this.pendingDataLock) {
-            super.getLogger().writeLog(LogType.DEBUG, "TcpServerNIO", "writeDebugInfo", "Pending Data: " + this.pendingData.size());
+            logger.debug(String.format("Pending Data: %d", pendingData.size()));
         }
         this.worker.writeDebugInfo();
     }
@@ -149,7 +152,7 @@ public class TcpServerNIO extends TcpServer implements Runnable {
     @Override
     public void run() {
         this.isRunning = true;
-        super.getLogger().writeLog(LogType.SERVER, "TcpServerNIO", "run", "Server started");
+        logger.info("Server started");
         while (this.isRunning) {
             try {
                 // Process any pending changes
@@ -159,10 +162,10 @@ public class TcpServerNIO extends TcpServer implements Runnable {
                             case ChangeRequest.CHANGEOPS:
                                 SelectionKey key = change.socket.keyFor(this.selector);
                                 if (key == null) {
-                                    super.getLogger().writeLog(LogType.SERVER, "TcpServerNIO", "run", "key is null, try to close");
+                                    logger.warn("key is null, try to close");
                                     this.worker.closedSocketChannel(change.socket);
                                 } else if (!key.isValid()) {
-                                    super.getLogger().writeLog(LogType.SERVER, "TcpServerNIO", "run", "invalid key, try to close");
+                                    logger.warn("invalid key, try to close");
                                     this.worker.closedSocketChannel(change.socket);
                                 } else {
                                     key.interestOps(change.ops);
@@ -195,12 +198,12 @@ public class TcpServerNIO extends TcpServer implements Runnable {
                     }
                 }
             } catch (ClosedSelectorException e) {
-                super.getLogger().writeLog(LogType.SERVER, "TcpServerNIO", "run", "Selector closed");
-            } catch (Exception e) {
-                super.getLogger().writeLog(e);
+                logger.warn("Selector closed");
+            } catch (Exception ex) {
+                logger.error(ex);
             }
         }
-        super.getLogger().writeLog(LogType.SERVER, "TcpServerNIO", "run", "Server stopped");
+        logger.info("Server stopped");
     }
 
     private void accept(SelectionKey key) throws IOException {

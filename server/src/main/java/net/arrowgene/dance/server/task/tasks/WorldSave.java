@@ -34,7 +34,7 @@ public class WorldSave extends Task {
     private DanceServer server;
 
     public WorldSave(DanceServer server) {
-        super(server.getServerConfig().getWorldSavePeriodMin(), server.getServerConfig().getWorldSavePeriodMin(), TimeUnit.MINUTES, server.getLogger());
+        super(server.getServerConfig().getWorldSavePeriodMin(), server.getServerConfig().getWorldSavePeriodMin(), TimeUnit.MINUTES);
         this.server = server;
     }
 
@@ -45,6 +45,6 @@ public class WorldSave extends Task {
 
     @Override
     public void execute() {
-        this.server.save();
+        server.save();
     }
 }

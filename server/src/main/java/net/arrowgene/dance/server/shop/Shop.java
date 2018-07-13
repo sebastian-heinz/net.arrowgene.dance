@@ -26,16 +26,12 @@ package net.arrowgene.dance.server.shop;
 
 
 import net.arrowgene.dance.library.models.character.Character;
-import net.arrowgene.dance.library.models.item.InventoryItem;
-import net.arrowgene.dance.library.models.item.InventorySlotType;
-import net.arrowgene.dance.library.models.item.ItemPriceCategoryType;
-import net.arrowgene.dance.library.models.item.ShopItem;
-import net.arrowgene.dance.server.client.DanceClient;
+import net.arrowgene.dance.library.models.item.*;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.library.models.item.Inventory;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
-
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,6 +39,9 @@ import java.util.List;
 
 
 public class Shop extends ServerComponent {
+
+
+    private static final Logger logger = LogManager.getLogger(Shop.class);
 
     public static final int EXPAND_STORAGE_COST = 1000;
 
@@ -90,7 +89,7 @@ public class Shop extends ServerComponent {
 
     @Override
     public void writeDebugInfo() {
-        getLogger().writeLog(LogType.DEBUG, "Shop", "writeDebugInfo", "Items: " + this.items.size());
+        logger.debug(String.format("Items: %d", items.size()));
     }
 
     public ArrayList<ShopItem> getShopItems() {
@@ -111,7 +110,7 @@ public class Shop extends ServerComponent {
     public ShopMessages buyItem(int itemId, DanceClient client) {
         ShopItem shopItem = this.getShopItem(itemId);
         if (shopItem == null) {
-            super.getLogger().writeLog(LogType.ERROR, "ag_items missing item id:" + itemId);
+            logger.error(String.format("ag_items missing item id: %d", itemId));
             return ShopMessages.MSG_ERROR;
         } else {
             return this.buyItem(shopItem, client);
@@ -121,7 +120,7 @@ public class Shop extends ServerComponent {
     public ShopMessages buyItem(ShopItem shopItem, DanceClient client) {
 
         if (shopItem == null) {
-            super.getLogger().writeLog(LogType.ERROR, "Shop Item is null");
+            logger.error("Shop Item is null");
             return ShopMessages.MSG_ERROR;
         }
 
@@ -135,7 +134,7 @@ public class Shop extends ServerComponent {
             return ShopMessages.MSG_YOU_DO_NOT_HAVE_ENOUGH_COINS_POINTS_OR_BONUS_FOR_THIS_ITEM;
         }
         if (!this.spendMoney(character, shopItem)) {
-            super.getLogger().writeLog(LogType.ERROR, "Payment Error!!!!! Investigate and make more robust");
+            logger.error("Payment Error!!!!! Investigate and make more robust");
             return ShopMessages.MSG_ERROR_PLEASE_CHECK;
         }
 

@@ -28,21 +28,28 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.arrowgene.dance.library.models.account.Account;
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
 import net.arrowgene.dance.query.models.QueryResponse;
 import org.apache.http.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class QueryRequest {
+
+    private static final Logger logger = LogManager.getLogger(QueryRequest.class);
 
     private String method;
     private Map<String, String> queryParameter;
@@ -56,15 +63,13 @@ public class QueryRequest {
     private String responseBody;
     private String requestRawBody;
     private JsonElement requestJson;
-    private Logger logger;
     private Account account;
     private String host;
     private HttpResponse httpResponse;
 
-    public QueryRequest(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext, String route, Logger logger) {
+    public QueryRequest(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext, String route) {
         this.httpResponse = httpResponse;
         this.route = route;
-        this.logger = logger;
         this.responseHeaders = new HashMap<>();
         this.requestHeaders = new HashMap<>();
         for (Header requestHeader : httpRequest.getAllHeaders()) {
@@ -161,7 +166,7 @@ public class QueryRequest {
             Object obj = gson.fromJson(this.getRequestRawBody(), clazz);
             model = (T) obj;
         } catch (Exception e) {
-            this.logger.writeLog(e);
+            logger.error(e);
         }
         return model;
     }
@@ -215,7 +220,7 @@ public class QueryRequest {
             String responseJson = gson.toJson(model);
             this.respondJson(responseJson);
         } else {
-            this.logger.writeLog(LogType.WARNING, "QueryServer: Sending null object");
+            logger.warn("Sending null object");
             respondError();
         }
     }
@@ -228,14 +233,14 @@ public class QueryRequest {
             this.setResponseBody(responseJson);
             this.respond();
         } else {
-            this.logger.writeLog(LogType.WARNING, "QueryServer: Sending null or empty object");
+            logger.warn("Sending null or empty object");
             respondError();
         }
     }
 
     public void respond() {
         if (this.responseHTTPCode == 0) {
-            this.logger.writeLog(LogType.WARNING, "QueryServer: No HTTP Code set");
+            logger.warn("No HTTP Code set");
             respondError();
         } else {
             for (Map.Entry<String, String> entry : responseHeaders.entrySet()) {
@@ -264,7 +269,7 @@ public class QueryRequest {
                         value = java.net.URLDecoder.decode(pair[1], "UTF-8");
                     }
                 } catch (UnsupportedEncodingException e) {
-                    this.logger.writeLog(e);
+                    logger.error(e);
                 }
 
                 if (key != null && value != null) {
@@ -291,7 +296,7 @@ public class QueryRequest {
                 try {
                     part = java.net.URLDecoder.decode(pathPart, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
-                    this.logger.writeLog(e);
+                    logger.error(e);
                 }
                 if (part != null) {
                     result[i] = part;
@@ -336,12 +341,12 @@ public class QueryRequest {
             }
             result = new String(out.toByteArray(), "UTF-8");
         } catch (IOException e) {
-            this.logger.writeLog(e);
+            logger.error(e);
         } finally {
             try {
                 bodyStream.close();
             } catch (IOException e) {
-                this.logger.writeLog(e);
+                logger.error(e);
             }
         }
 
@@ -375,7 +380,7 @@ public class QueryRequest {
         try {
             json = new JsonParser().parse(string);
         } catch (Exception e) {
-            this.logger.writeLog(e);
+            logger.error(e);
         }
         return json;
     }

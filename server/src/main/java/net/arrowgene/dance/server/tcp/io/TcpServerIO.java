@@ -26,18 +26,22 @@ package net.arrowgene.dance.server.tcp.io;
 
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.tcp.TcpClient;
 import net.arrowgene.dance.server.tcp.TcpServer;
 import net.arrowgene.dance.server.tcp.io.perconnection.TPerClientManager;
 import net.arrowgene.dance.server.tcp.io.threadpool.TPoolClientManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TcpServerIO extends TcpServer implements Runnable {
+
+
+    private static final Logger logger = LogManager.getLogger(TcpServerIO.class);
 
     public static boolean isSocketClosedException(Exception ex) {
         boolean result = false;
@@ -63,7 +67,7 @@ public class TcpServerIO extends TcpServer implements Runnable {
                 this.clientManager = new TPoolClientManager(server, this);
                 break;
             default:
-                super.getLogger().writeLog(LogType.ERROR, "TcpServerIO", "ctor", "Manager Type not found, check settings for [ClientManagerType]value ");
+                logger.error("Manager Type not found, check settings for [ClientManagerType]value");
                 break;
         }
     }
@@ -75,8 +79,8 @@ public class TcpServerIO extends TcpServer implements Runnable {
 
             try {
                 this.socket = new ServerSocket(this.port, 50, this.hostAddress);
-            } catch (IOException e) {
-                super.getLogger().writeLog(e);
+            } catch (IOException ex) {
+                logger.error(ex);
             }
 
             if (this.socket != null) {
@@ -86,7 +90,7 @@ public class TcpServerIO extends TcpServer implements Runnable {
                 this.acceptThread.start();
             }
         } else {
-            super.getLogger().writeLog(LogType.WARNING, "TcpServerIO", "start", "Server already started");
+            logger.warn("Server already started");
         }
     }
 
@@ -96,11 +100,11 @@ public class TcpServerIO extends TcpServer implements Runnable {
             this.isRunning = false;
             try {
                 this.socket.close();
-            } catch (IOException e) {
-                super.getLogger().writeLog(e);
+            } catch (IOException ex) {
+                logger.error(ex);
             }
         } else {
-            super.getLogger().writeLog(LogType.WARNING, "TcpServerIO", "stop", "Server already stopped");
+            logger.warn("Server already stopped");
         }
     }
 
@@ -112,22 +116,21 @@ public class TcpServerIO extends TcpServer implements Runnable {
     @Override
     public void run() {
         this.isRunning = true;
-        super.getLogger().writeLog(LogType.SERVER, "TcpServerIO", "run", "Server started");
-
+        logger.info("Server started");
         while (this.isRunning) {
             try {
                 Socket clientSocket = this.socket.accept();
-                TcpClientIO tcpClient = new TcpClientIO(clientSocket, super.getLogger());
+                TcpClientIO tcpClient = new TcpClientIO(clientSocket);
                 this.clientManager.newConnection(tcpClient);
             } catch (IOException e) {
                 if (TcpServerIO.isSocketClosedException(e)) {
-                    super.getLogger().writeLog(LogType.SERVER, "TcpServerIO", "run", "Accept socket closed");
+                    logger.warn("Accept socket closed");
                 } else {
-                    super.getLogger().writeLog(e);
+                    logger.error(e);
                 }
             }
         }
-        super.getLogger().writeLog(LogType.SERVER, "TcpServerIO", "run", "Server stopped");
+        logger.info("Server stopped");
     }
 
     public void clientConnected(TcpClient tcpClient) {

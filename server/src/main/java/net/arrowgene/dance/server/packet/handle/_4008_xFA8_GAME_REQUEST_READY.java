@@ -24,14 +24,18 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _4008_xFA8_GAME_REQUEST_READY extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_4008_xFA8_GAME_REQUEST_READY.class);
 
     public _4008_xFA8_GAME_REQUEST_READY(DanceServer server) {
         super(server);
@@ -39,10 +43,8 @@ public class _4008_xFA8_GAME_REQUEST_READY extends HandlerBase {
 
     @Override
     public SendPacket[] handle(ReadPacket packet, DanceClient client) {
-
         client.getRoom().setReady(client);
-        getLogger().writeLog(LogType.CLIENT, "changed ready state to: '" + client.getCharacter().isReady() + "' in room: '" + client.getRoom().getName() + "'", client);
-
+        logger.info(String.format("changed ready ready to '%b' in room '%s' (%s)", client.getCharacter().isReady(), client.getRoom().getName(), client));
         return null;
     }
 }

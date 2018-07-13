@@ -25,10 +25,11 @@
 package net.arrowgene.dance.server.tcp.io.threadpool;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.tcp.io.ClientManager;
 import net.arrowgene.dance.server.tcp.io.TcpClientIO;
 import net.arrowgene.dance.server.tcp.io.TcpServerIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -36,6 +37,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class TPoolClientManager extends ClientManager {
+
+
+    private static final Logger logger = LogManager.getLogger(TPoolClientManager.class);
 
     private boolean isRunning;
     private LinkedBlockingQueue<TPoolClient> readyClients;
@@ -61,7 +65,7 @@ public class TPoolClientManager extends ClientManager {
 
     public void start() {
         if (!this.isRunning) {
-            super.getLogger().writeLog(LogType.SERVER, "TPoolClientManager", "start", "Starting Client Manager...");
+            logger.info("Starting Client Manager...");
             this.isRunning = true;
             this.consumerCount = getConfig().getTpConsumerCount();
             this.consumers = new TPoolConsumer[this.consumerCount];
@@ -78,13 +82,13 @@ public class TPoolClientManager extends ClientManager {
                 this.producers[i].start();
             }
         } else {
-            super.getLogger().writeLog(LogType.SERVER, "TPoolClientManager", "start", "Client Manager already started");
+            logger.info("Client Manager already started");
         }
     }
 
     public void stop() {
         if (this.isRunning) {
-            super.getLogger().writeLog(LogType.SERVER, "TPoolClientManager", "stop", "Stopping Client Manager...");
+            logger.info("Stopping Client Manager...");
             this.isRunning = false;
             for (int i = 0; i < this.consumerCount; i++) {
                 this.consumers[i].stop();
@@ -93,36 +97,37 @@ public class TPoolClientManager extends ClientManager {
                 this.producers[i].stop();
             }
         } else {
-            super.getLogger().writeLog(LogType.SERVER, "TPoolClientManager", "stop", "Client Manager already stopped");
+            logger.info("Client Manager already stopped");
         }
     }
 
     public void disconnect(TPoolClient client) {
-        super.getLogger().writeLog(LogType.SERVER, "TPoolClientManager", "disconnect", "Disconnecting: " + client.getIdentity());
+        logger.info(String.format("Disconnecting (%s)", client.getIdentity()));
         client.setAlive(false);
         this.tcpServerIO.clientDisconnected(client);
         try {
             client.getSocket().close();
         } catch (IOException e) {
-            super.getLogger().writeLog(e, client);
+            logger.error(e);
         }
     }
 
     @Override
     public void writeDebugInfo() {
-        super.getLogger().writeLog(LogType.DEBUG, "TPoolClientManager", "writeDebugInfo", "Idle Clients: " + this.idleClients.size());
-        super.getLogger().writeLog(LogType.DEBUG, "TPoolClientManager", "writeDebugInfo", "Ready Clients: " + this.readyClients.size());
+        logger.debug(String.format("Idle Clients: %d", idleClients.size()));
+        logger.debug(String.format("Ready Clients: %d", readyClients.size()));
     }
 
     @Override
     public void newConnection(TcpClientIO tcpClient) {
         if (this.isRunning) {
-            TPoolClient tPoolClient = new TPoolClient(tcpClient.getSocket(), super.getLogger());
+            TPoolClient tPoolClient = new TPoolClient(tcpClient.getSocket());
             try {
                 tPoolClient.getSocket().setSoTimeout(50);
                 tPoolClient.getSocket().setKeepAlive(true);
             } catch (SocketException e) {
-                super.getLogger().writeLog(e, tcpClient);
+                logger.error("%s (%s)", e.getMessage(), tcpClient);
+                logger.error(e);
             }
             this.idleClients.add(tPoolClient);
             this.tcpServerIO.clientConnected(tPoolClient);

@@ -26,14 +26,18 @@ package net.arrowgene.dance.server.packet.handle;
 
 import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.packet.builder.RoomPacket;
 import net.arrowgene.dance.server.room.Room;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _3002_xBBA_ROOM_REQUEST_JOIN_ROOM extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_3002_xBBA_ROOM_REQUEST_JOIN_ROOM.class);
 
     public _3002_xBBA_ROOM_REQUEST_JOIN_ROOM(DanceServer server) {
         super(server);
@@ -52,12 +56,12 @@ public class _3002_xBBA_ROOM_REQUEST_JOIN_ROOM extends HandlerBase {
 
         if (success) {
             client.getRoom().sendPacket(RoomPacket.getInstance().getJoinRoomAnnouncePacket(client, room));
-            getLogger().writeLog(LogType.CLIENT, "joined room: " + room.getName(), client);
+            logger.info(String.format("joined room '%s' (%s)", room.getName(), client));
         } else {
             if (room != null) {
-                getLogger().writeLog(LogType.CLIENT, "couldn't join room: " + room.getName(), client);
+                logger.warn(String.format("couldn't join room '%s' (%s)", room.getName(), client));
             } else {
-                getLogger().writeLog(LogType.CLIENT, "couldn't join room number:" + roomNumber, client);
+                logger.warn(String.format("couldn't join room number '%d' (%s)", roomNumber, client));
             }
         }
 

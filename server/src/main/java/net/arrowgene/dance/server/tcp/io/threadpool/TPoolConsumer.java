@@ -26,16 +26,19 @@ package net.arrowgene.dance.server.tcp.io.threadpool;
 
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.tcp.io.TcpServerIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler {
+
+    private static final Logger logger = LogManager.getLogger(TPoolConsumer.class);
 
     private static final int joinTimeoutMS = 10;
 
@@ -55,11 +58,11 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
 
     public void start() {
         if (!isRunning) {
-            server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "start", "Starting TPoolConsumer [" + this.number + "] ...");
+            logger.info(String.format("Starting TPoolConsumer [%d] ...", number));
             isRunning = true;
             spawn();
         } else {
-            server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "start", "TPoolConsumer [" + this.number + "] already started");
+            logger.info(String.format("TPoolConsumer [%d] already started", number));
         }
 
     }
@@ -74,7 +77,7 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
     @SuppressWarnings("Duplicates")
     public void stop() {
         if (isRunning) {
-            server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "stop", "Stopping TPoolConsumer [" + number + "] ...");
+            logger.info(String.format("Stopping TPoolConsumer [%d] ...", number));
             isRunning = false;
             try {
                 thread.join(joinTimeoutMS);
@@ -82,16 +85,16 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
                     thread.interrupt();
                 }
             } catch (InterruptedException e) {
-                server.getLogger().writeLog(e);
+                logger.error(e);
             }
         } else {
-            server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "stop", "TPoolConsumer [" + number + "] already stopped");
+            logger.info(String.format("TPoolConsumer [%d] already stopped", number));
         }
     }
 
     @Override
     public void run() {
-        server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "run", "TPoolConsumer [" + number + "] started");
+        logger.info(String.format("TPoolConsumer [%d] started", number));
         while (isRunning) {
             TPoolClient currentClient = null;
             try {
@@ -99,9 +102,9 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
             } catch (InterruptedException e) {
                 // Blocking queue will need interruption to exit.
                 isRunning = false;
-                server.getLogger().writeLog(e);
+                logger.error(e);
             } catch (Exception e) {
-                server.getLogger().writeLog(e);
+                logger.error(e);
             }
             if (currentClient != null) {
                 if (currentClient.getAlive()) {
@@ -115,10 +118,10 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
                     manager.disconnect(currentClient);
                 }
             } else {
-                server.getLogger().writeLog(LogType.ERROR, "TPoolConsumer", "run", "TPoolConsumer [" + number + "] encountered null client.");
+                logger.info(String.format("TPoolConsumer [%d] encountered null client.", number));
             }
         }
-        server.getLogger().writeLog(LogType.SERVER, "TPoolConsumer", "run", "TPoolConsumer [" + number + "] stopped");
+        logger.info(String.format("TPoolConsumer [%d] stopped", number));
     }
 
     private ReadPacket readPacketBody(TPoolClient client) {
@@ -133,25 +136,28 @@ public class TPoolConsumer implements Runnable, Thread.UncaughtExceptionHandler 
             InputStream inStream = client.getSocket().getInputStream();
             readBytes = inStream.read(body, 0, bytesToRead);
         } catch (IOException e) {
-            server.getLogger().writeLog(e, client);
+            logger.error(String.format("%s (%s)", e.getMessage(), client));
+            logger.error(e);
         }
         if (readBytes == bytesToRead) {
             PacketType packetType = PacketType.getType(packetId);
             if (packetType != null) {
                 readPacket = new ReadPacket(packetType, body);
             } else {
-                server.getLogger().writeUnknownPacketLog(packetId, packetSize, body, client);
+                // TODO write packet log
+                // server.getLogger().writeUnknownPacketLog(packetId, packetSize, body, client);
             }
         } else {
-            server.getLogger().writeUnknownPacketLog(packetId, packetSize, body, client);
+            // TODO write packet log
+            // server.getLogger().writeUnknownPacketLog(packetId, packetSize, body, client);
         }
         return readPacket;
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        server.getLogger().writeLog(LogType.ERROR, "TPoolConsumer", "uncaughtException", "TPoolConsumer [" + number + "] died, restarting...");
-        server.getLogger().writeLog(e);
+        logger.error(String.format("TPoolConsumer [%d] died, restarting...", number));
+        logger.error(e);
         stop();
         start();
     }

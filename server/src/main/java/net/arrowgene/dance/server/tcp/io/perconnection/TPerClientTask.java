@@ -25,15 +25,14 @@
 package net.arrowgene.dance.server.tcp.io.perconnection;
 
 
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.tcp.TcpServer;
 import net.arrowgene.dance.server.tcp.io.TcpClientIO;
 import net.arrowgene.dance.server.tcp.io.TcpServerIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,12 +41,12 @@ import java.io.InputStream;
 public class TPerClientTask implements Runnable {
 
 
+    private static final Logger logger = LogManager.getLogger(TPerClientTask.class);
+
     private TcpClientIO client;
     private TcpServerIO tcpServerIO;
-    private ServerLogger logger;
 
-    TPerClientTask(TcpServerIO tcpServerIO, ServerLogger logger, TcpClientIO client) {
-        this.logger = logger;
+    TPerClientTask(TcpServerIO tcpServerIO, TcpClientIO client) {
         this.tcpServerIO = tcpServerIO;
         this.client = client;
     }
@@ -67,7 +66,7 @@ public class TPerClientTask implements Runnable {
                 if (TcpServerIO.isSocketClosedException(e)) {
                     this.client.setAlive(false);
                 } else {
-                    this.logger.writeLog(e, this.client);
+                    logger.error(e);
                     this.disconnectCauseError();
                 }
             }
@@ -90,7 +89,7 @@ public class TPerClientTask implements Runnable {
                         if (TcpServerIO.isSocketClosedException(e)) {
                             this.client.setAlive(false);
                         } else {
-                            this.logger.writeLog(e, this.client);
+                            logger.error(e);
                             this.disconnectCauseError();
                         }
                     }
@@ -101,31 +100,28 @@ public class TPerClientTask implements Runnable {
                             ReadPacket readPacket = new ReadPacket(packetType, body);
                             this.tcpServerIO.packetReceived(this.client, readPacket);
                         } else {
-                            this.logger.writeUnknownPacketLog(packetId, packetSize, body, client);
+                            // TODO write packet log
+                            // this.logger.writeUnknownPacketLog(packetId, packetSize, body, client);
                         }
                     } else if (readBytes < 0) {
                         this.client.setAlive(false);
                     } else {
-                        this.logger.writeLog(LogType.WARNING, "Reported packet size(" + bytesToRead +
-                            ") does not match read bytes from stream(" + readBytes + ")", this.client);
+                        logger.warn(String.format("Reported packet size '%d' does not match read bytes from stream '%d' (%s)", bytesToRead, readBytes, client));
                     }
                 } else {
-                    this.logger.writeLog(LogType.WARNING, "Packet of size:" + packetSize
-                        + " exceeding maximum:" + TcpServer.MAX_PACKET_SIZE
-                        + " received", client);
+                    logger.warn(String.format("Packet of size '%d' exceeding maximum '%d' (%s)", packetSize, TcpServer.MAX_PACKET_SIZE, client));
                 }
             } else if (readBytes < 0) {
                 this.client.setAlive(false);
             } else {
-                this.logger.writeLog(LogType.WARNING, "Packet header size(" + Packet.HEADER_SIZE +
-                    ") does not match read bytes from stream(" + readBytes + ")", this.client);
+                logger.warn(String.format("Packet header size '%d' does not match read bytes from stream '%d' (%s)", Packet.HEADER_SIZE, readBytes, client));
             }
         }
         this.tcpServerIO.clientDisconnected(this.client);
     }
 
     private void disconnectCauseError() {
-        this.logger.writeLog(LogType.ERROR, "Client encountered error, disconnecting...", this.client);
+        logger.error(String.format("Client encountered error, disconnecting (%s)", client));
         client.setAlive(false);
     }
 }

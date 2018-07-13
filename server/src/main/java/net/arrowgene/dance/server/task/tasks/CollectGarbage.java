@@ -31,11 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CollectGarbage extends Task {
 
-    private DanceServer server;
-
     public CollectGarbage(DanceServer server) {
-        super(server.getServerConfig().getDebugGarbageCollectionMS(), server.getServerConfig().getDebugGarbageCollectionMS(), TimeUnit.MILLISECONDS, server.getLogger());
-        this.server = server;
+        super(server.getServerConfig().getDebugGarbageCollectionMS(), server.getServerConfig().getDebugGarbageCollectionMS(), TimeUnit.MILLISECONDS);
     }
 
     @Override

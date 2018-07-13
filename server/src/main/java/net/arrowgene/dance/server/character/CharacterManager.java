@@ -29,15 +29,18 @@ import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.library.models.character.CharacterProvider;
 import net.arrowgene.dance.library.models.character.CharacterSexTyp;
 import net.arrowgene.dance.library.models.character.SocialEntry;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CharacterManager extends ServerComponent {
+
+    private static final Logger logger = LogManager.getLogger(CharacterManager.class);
 
     private final Object charactersLock = new Object();
 
@@ -93,15 +96,13 @@ public class CharacterManager extends ServerComponent {
 
     @Override
     public void writeDebugInfo() {
-        getLogger().writeLog(LogType.DEBUG, "CharacterManager", "writeDebugInfo", "Characters: " + this.characters.size());
+        logger.debug(String.format("Characters: %d", characters.size()));
     }
 
     /**
      * Tries to get the Character-Object from a connected client.
      * On failure a second attempt will try to fetch the character from the database.
      *
-     * @param characterName
-     * @return
      */
     public Character getCharacterByName(String characterName) {
 

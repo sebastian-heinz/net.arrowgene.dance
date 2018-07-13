@@ -34,7 +34,8 @@ import net.arrowgene.dance.query.QueryRequest;
 import net.arrowgene.dance.query.models.AuthenticationRequest;
 import net.arrowgene.dance.query.models.AuthenticationResponse;
 import net.arrowgene.dance.server.DanceServer;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 
@@ -42,6 +43,8 @@ import java.util.Date;
  * JWT implementation: https://github.com/jwtk/jjwt
  */
 public class AuthenticationEndpoint extends QueryEndpoint {
+
+    private static final Logger logger = LogManager.getLogger(AuthenticationEndpoint.class);
 
     public AuthenticationEndpoint(DanceServer server) {
         super(server);
@@ -87,7 +90,7 @@ public class AuthenticationEndpoint extends QueryEndpoint {
                     response.setJwt(jwt);
                     response.setStatusCode(200);
                 } catch (Exception e) {
-                    super.server.getLogger().writeLog(e);
+                    logger.error(e);
                 }
 
             } else {

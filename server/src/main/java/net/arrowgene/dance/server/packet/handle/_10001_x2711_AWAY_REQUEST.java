@@ -24,11 +24,12 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The client will send this packet every 15 seconds,
@@ -36,6 +37,8 @@ import net.arrowgene.dance.server.packet.SendPacket;
  */
 public class _10001_x2711_AWAY_REQUEST extends HandlerBase {
 
+
+    private static final Logger logger = LogManager.getLogger(_10001_x2711_AWAY_REQUEST.class);
     private static final int resetTimeout = 20;
 
     public _10001_x2711_AWAY_REQUEST(DanceServer server) {
@@ -51,10 +54,10 @@ public class _10001_x2711_AWAY_REQUEST extends HandlerBase {
             client.setTotalSecondsAway(0);
         } else {
             client.setTotalSecondsAway(client.getTotalSecondsAway() + diff);
-            getLogger().writeLog(LogType.CLIENT, String.format("Away %s Seconds", client.getTotalSecondsAway()), client);
+            logger.info(String.format("Away %d Seconds (%s)", client.getTotalSecondsAway(), client));
             if (client.getTotalSecondsAway() > server.getServerConfig().getMaxAwaySeconds()) {
                 client.disconnect();
-                getLogger().writeLog(LogType.CLIENT, "Disconnected by Server because of inactivity", client);
+                logger.info(String.format("Disconnected by Server because of inactivity (%s)", client));
             }
         }
         client.setLastAwayPing(now);

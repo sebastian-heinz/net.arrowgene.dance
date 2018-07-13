@@ -26,20 +26,22 @@ package net.arrowgene.dance.server.packet.handle;
 
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.character.Character;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.packet.enums.LoginErrorType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 
 
 public class _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_1000_x3E8_LOGIN_REQUEST_AUTHENTICATION.class);
 
     private final Object loginRequestsLock = new Object();
     private HashSet<String> loginRequests;
@@ -85,7 +87,7 @@ public class _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION extends HandlerBase {
                                 super.server.clientAuthenticated(client);
                                 Character character = client.getCharacter();
                                 if (character != null) {
-                                    getLogger().writeLog(LogType.CLIENT, "logged in", client);
+                                    logger.info(String.format("Logged In (%s)", client));
                                     answerPacket.addInt32(LoginErrorType.MSG_NO_ERROR.getNumValue());
                                     answerPacket.addInt16(versionMajorClient);
                                     answerPacket.addInt16(versionMinorClient);
@@ -109,13 +111,14 @@ public class _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION extends HandlerBase {
                                 } else {
                                     // Multiple Characters can be created with the web frontend.
                                     // One of the Characters needs to be set as active.
-                                    getLogger().writeLog(LogType.CLIENT, "no character created or no character is set active in 'user_active_character_id' of 'ag_user' table", client);
+
+                                    logger.warn(String.format("no character created or no character is set active in 'user_active_character_id' of 'ag_user' table (%s)", client));
                                     // TODO No Character created / active: Find a better error message for dance client
                                     answerPacket.addInt32(LoginErrorType.MSG_LOGIN_ERROR.getNumValue());
                                     disconnectClient = true;
                                 }
                             } else {
-                                getLogger().writeLog(LogType.CLIENT, "tried to login while already online, disconnecting both", client);
+                                logger.warn(String.format("tried to login while already online, disconnecting both (%s)", client));
                                 //TODO Disconnect whoever is online? or not in case the person is in a active game?
                                 possibleActive.disconnect();
                                 answerPacket.addInt32(LoginErrorType.MSG_ALREADY_ONLINE.getNumValue());
@@ -133,18 +136,17 @@ public class _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION extends HandlerBase {
                     }
                 } else {
                     answerPacket.addInt32(LoginErrorType.MSG_WRONG_PASSWORD.getNumValue());
-                    getLogger().writeLog(LogType.CLIENT, "Login with username '" + username + "' failed, because no account was found for the credentials", client);
+                    logger.warn(String.format("Login with username '%s' failed, because no account was found for the credentials (%s)", username, client));
                     disconnectClient = true;
                 }
                 freeRequest(username);
             } else {
-                getLogger().writeLog(LogType.CLIENT, "Login with username '" + username + "' failed, because a previous login request that has not completed yet", client);
+                logger.warn(String.format("Login with username '%s' failed, because a previous login request has not completed yet (%s)", username, client));
                 answerPacket.addInt32(LoginErrorType.MSG_ALREADY_ONLINE.getNumValue());
                 disconnectClient = true;
             }
         } else {
-            // TODO Server is not yet started / shutting down, find a better error msg.
-            getLogger().writeLog(LogType.CLIENT, "Login failed, because the server is not ready yet", client);
+            logger.warn(String.format("Login failed, because the server is not ready yet (%s)", client));
             answerPacket.addInt32(LoginErrorType.MSG_OLD_CLIENT.getNumValue());
             disconnectClient = true;
         }

@@ -25,8 +25,9 @@
 package net.arrowgene.dance.server.tcp.io;
 
 import net.arrowgene.dance.library.common.Converter;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.tcp.TcpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,12 +36,13 @@ import java.net.SocketAddress;
 
 public class TcpClientIO extends TcpClient {
 
-    private Socket socket;
-    private ServerLogger logger;
 
-    public TcpClientIO(Socket socket, ServerLogger logger) {
+    private static final Logger logger = LogManager.getLogger(TcpClientIO.class);
+
+    private Socket socket;
+
+    public TcpClientIO(Socket socket) {
         super();
-        this.logger = logger;
         this.socket = socket;
     }
 
@@ -54,7 +56,7 @@ public class TcpClientIO extends TcpClient {
             OutputStream outStream = this.socket.getOutputStream();
             outStream.write(data);
         } catch (IOException e) {
-            this.logger.writeLog(e, this);
+            logger.error(e);
         }
     }
 

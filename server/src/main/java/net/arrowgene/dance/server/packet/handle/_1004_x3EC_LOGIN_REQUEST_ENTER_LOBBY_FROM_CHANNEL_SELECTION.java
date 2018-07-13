@@ -28,14 +28,18 @@ import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.channel.Channel;
 import net.arrowgene.dance.library.models.channel.ChannelType;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _1004_x3EC_LOGIN_REQUEST_ENTER_LOBBY_FROM_CHANNEL_SELECTION extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_1004_x3EC_LOGIN_REQUEST_ENTER_LOBBY_FROM_CHANNEL_SELECTION.class);
 
     public _1004_x3EC_LOGIN_REQUEST_ENTER_LOBBY_FROM_CHANNEL_SELECTION(DanceServer server) {
         super(server);
@@ -51,13 +55,13 @@ public class _1004_x3EC_LOGIN_REQUEST_ENTER_LOBBY_FROM_CHANNEL_SELECTION extends
         Channel channel = server.getLobby().getChannel(type, number);
 
         if (channel == null) {
-            getLogger().writeLog(LogType.CLIENT, "tried to join a channel which is 'null'", client);
+            logger.warn(String.format("tried to join a channel which is 'null' (%s)", client));
             answerPacket.addInt32(1);
         } else if (channel.isFull()) {
-            getLogger().writeLog(LogType.CLIENT, "couldn't join " + channel.getDetails().getName() + " because it's full", client);
+            logger.warn(String.format("couldn't join channel '%s' because it's full (%s)", channel.getDetails().getName(), client));
             answerPacket.addInt32(1);
         } else {
-            getLogger().writeLog(LogType.CLIENT, "joined " + channel.getDetails().getName(), client);
+            logger.info(String.format("joined channel '%s' (%s)", channel.getDetails().getName(), client));
             channel.join(client);
         }
         answerPacket.addInt32(0);

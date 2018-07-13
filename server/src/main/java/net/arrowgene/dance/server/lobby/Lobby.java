@@ -27,17 +27,21 @@ package net.arrowgene.dance.server.lobby;
 
 import net.arrowgene.dance.library.models.channel.ChannelDetails;
 import net.arrowgene.dance.library.models.channel.ChannelType;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
 import net.arrowgene.dance.server.channel.Channel;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class Lobby extends ServerComponent {
+
+
+    private static final Logger logger = LogManager.getLogger(Lobby.class);
 
     private final Object channelManagerLock = new Object();
     private ArrayList<Channel> channels;
@@ -97,21 +101,21 @@ public class Lobby extends ServerComponent {
     @Override
     public void writeDebugInfo() {
         synchronized (this.channelManagerLock) {
-            getLogger().writeLog(LogType.DEBUG, "Lobby", "writeDebugInfo", "Channels: " + this.channels.size());
+            logger.debug(String.format("Channels: %d", channels.size()));
         }
     }
 
     public void addChannel(Channel channel) {
         if (channel.getDetails().getPosition() >= 0) {
-            if (this.getChannel(channel.getDetails().getType(), channel.getDetails().getPosition()) != null) {
-                super.getLogger().writeLog(LogType.WARNING, "ChannelDetails already exists");
+            if (getChannel(channel.getDetails().getType(), channel.getDetails().getPosition()) != null) {
+                logger.warn("ChannelDetails already exists");
             } else {
                 synchronized (this.channelManagerLock) {
                     this.channels.add(channel);
                 }
             }
         } else {
-            super.getLogger().writeLog(LogType.WARNING, "Invalid ChannelDetails number");
+            logger.warn("Invalid ChannelDetails number");
         }
     }
 

@@ -29,10 +29,9 @@ import net.arrowgene.dance.library.models.mail.Mail;
 import net.arrowgene.dance.library.models.mail.MailType;
 import net.arrowgene.dance.library.models.mail.Mailbox;
 import net.arrowgene.dance.library.models.mail.SpecialSenderType;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 
 import java.util.List;
 

@@ -25,9 +25,10 @@
 package net.arrowgene.dance.server.task.tasks;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.task.Task;
 import net.arrowgene.dance.server.util.ProcessInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +37,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class WriteProcessInfo extends Task {
 
+    private static final Logger logger = LogManager.getLogger(Task.class);
+
     private DanceServer server;
 
     public WriteProcessInfo(DanceServer server) {
-        super(server.getServerConfig().getDebugProcessInfoMS(), server.getServerConfig().getDebugProcessInfoMS(), TimeUnit.MILLISECONDS, server.getLogger());
+        super(server.getServerConfig().getDebugProcessInfoMS(), server.getServerConfig().getDebugProcessInfoMS(), TimeUnit.MILLISECONDS);
         this.server = server;
     }
 
@@ -50,15 +53,12 @@ public class WriteProcessInfo extends Task {
 
     @Override
     public void execute() {
-
-        this.logger.writeLog(LogType.DEBUG, "WriteProcessInfo", "writeDebugInfo", "Memory: " + ProcessInfo.getMemoryStats());
-        this.logger.writeLog(LogType.DEBUG, "WriteProcessInfo", "writeDebugInfo", "Threads: " + ProcessInfo.getThreadStats());
-        this.logger.writeLog(LogType.DEBUG, "WriteProcessInfo", "writeDebugInfo", "System: " + ProcessInfo.getSystemStats());
+        logger.debug(String.format("Memory: %s", ProcessInfo.getMemoryStats()));
+        logger.debug(String.format("Threads: %s", ProcessInfo.getThreadStats()));
+        logger.debug(String.format("System: %s", ProcessInfo.getSystemStats()));
         for (String threadName : ProcessInfo.getThreadNames()) {
-            this.logger.writeLog(LogType.DEBUG, "WriteProcessInfo", "writeDebugInfo", "Active Thread: " + threadName);
+            logger.debug(String.format("Active Thread: %s", threadName));
         }
-        this.server.writeDebugInfo();
     }
-
 
 }

@@ -35,22 +35,22 @@ import net.arrowgene.dance.library.models.item.InventoryItem;
 import net.arrowgene.dance.library.models.mail.Mailbox;
 import net.arrowgene.dance.library.models.song.FavoriteSong;
 import net.arrowgene.dance.library.models.wedding.WeddingRecord;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.channel.Channel;
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.builder.CharacterPacket;
 import net.arrowgene.dance.server.packet.builder.ItemPacket;
 import net.arrowgene.dance.server.room.Room;
 import net.arrowgene.dance.server.tcp.TcpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DanceClient {
 
-    private ServerLogger logger;
+    private static final Logger logger = LogManager.getLogger(DanceClient.class);
+
     private TcpClient tcpClient;
     private Account account;
     private Character character;
@@ -69,15 +69,14 @@ public class DanceClient {
     private long totalSecondsAway;
     private boolean loadingDone = false;
 
-    public DanceClient(TcpClient tcpClient, ServerLogger logger) {
+    public DanceClient(TcpClient tcpClient) {
         this.tcpClient = tcpClient;
-        this.logger = logger;
-        this.inventory = new Inventory();
-        this.groupMember = null;
-        this.mailbox = new Mailbox();
-        this.buddyList = new ArrayList<>();
-        this.blackList = new ArrayList<>();
-        this.favoriteSongs = new ArrayList<>();
+        inventory = new Inventory();
+        groupMember = null;
+        mailbox = new Mailbox();
+        buddyList = new ArrayList<>();
+        blackList = new ArrayList<>();
+        favoriteSongs = new ArrayList<>();
     }
 
     @Override
@@ -200,19 +199,19 @@ public class DanceClient {
     }
 
     public void addBuddy(SocialEntry buddy) {
-        this.buddyList.add(buddy);
+        buddyList.add(buddy);
     }
 
     public void removeBuddy(SocialEntry buddy) {
-        this.buddyList.remove(buddy);
+        buddyList.remove(buddy);
     }
 
     public void addFavoriteSong(FavoriteSong favoriteSong) {
-        this.favoriteSongs.add(favoriteSong);
+        favoriteSongs.add(favoriteSong);
     }
 
     public void removeFavoriteSong(FavoriteSong favoriteSong) {
-        this.favoriteSongs.remove(favoriteSong);
+        favoriteSongs.remove(favoriteSong);
     }
 
     public Group getGroup() {
@@ -224,7 +223,7 @@ public class DanceClient {
     }
 
     public WeddingRecord getWeddingRecord() {
-        return this.weddingRecord;
+        return weddingRecord;
     }
 
     public void setWeddingRecord(WeddingRecord weddingRecord) {
@@ -266,9 +265,10 @@ public class DanceClient {
      * @param packet Packet to be sent.
      */
     public void sendPacket(Packet packet) {
-        if (this.tcpClient.getAlive()) {
-            this.tcpClient.sendPacket(packet.getAllBytes());
-            this.logger.writePacketLog(packet, this, LogType.RESPONSE_PACKET);
+        if (tcpClient.getAlive()) {
+            tcpClient.sendPacket(packet.getAllBytes());
+            // TODO log packet
+            //logger.writePacketLog(packet, this, LogType.RESPONSE_PACKET);
         }
     }
 
@@ -278,27 +278,27 @@ public class DanceClient {
     public void refreshCharacter() {
         // This will refresh the numbers (Level, coins, etc..)
         Packet characterInfo = CharacterPacket.getInstance().getCharacter(this);
-        this.sendPacket(characterInfo);
+        sendPacket(characterInfo);
 
         // This will refresh the small character image
-        Packet itemList = ItemPacket.getInstance().getItemList(this.inventory.getItems());
-        this.sendPacket(itemList);
+        Packet itemList = ItemPacket.getInstance().getItemList(inventory.getItems());
+        sendPacket(itemList);
     }
 
     /**
      * Disconnects the client on the next opportunity, allowing for a graceful shutdown.
      */
     public void disconnect() {
-        this.tcpClient.setAlive(false);
+        tcpClient.setAlive(false);
     }
 
     /**
      * Equips all items which are marked as equipped in the inventory.
      */
     public void loadEquippedItems() {
-        for (InventoryItem item : this.inventory.getItems()) {
+        for (InventoryItem item : inventory.getItems()) {
             if (item.isEquipped()) {
-                this.equipItem(item);
+                equipItem(item);
             }
         }
     }
@@ -317,46 +317,46 @@ public class DanceClient {
         switch (inventoryItem.getShopItem().getCategory()) {
             case HEAD_N_HAIR_HAIRSTYLE_MALE:
             case HEAD_N_HAIR_HAIRSTYLE_FEMALE:
-                this.character.setHair(modelId);
-                this.inventory.setHairSlot(slotId);
+                character.setHair(modelId);
+                inventory.setHairSlot(slotId);
                 break;
             case CLOTHING_TOPS_MALE:
             case CLOTHING_TOPS_FEMALE:
-                this.character.setTop(modelId);
-                this.inventory.setTopSlot(slotId);
+                character.setTop(modelId);
+                inventory.setTopSlot(slotId);
                 break;
             case CLOTHING_BOTTOMS_MALE:
             case CLOTHING_BOTTOMS_FEMALE:
-                this.character.setPants(modelId);
-                this.inventory.setPantsSlot(slotId);
+                character.setPants(modelId);
+                inventory.setPantsSlot(slotId);
                 break;
             case CLOTHING_GLOVES_MALE:
             case CLOTHING_GLOVES_FEMALE:
-                this.character.setGloves(modelId);
-                this.inventory.setGlovesSlot(slotId);
+                character.setGloves(modelId);
+                inventory.setGlovesSlot(slotId);
                 break;
             case CLOTHING_SHOES_MALE:
             case CLOTHING_SHOES_FEMALE:
-                this.character.setShoes(modelId);
-                this.inventory.setShoesSlot(slotId);
+                character.setShoes(modelId);
+                inventory.setShoesSlot(slotId);
                 break;
             case HEAD_N_HAIR_FACES_MALE:
             case HEAD_N_HAIR_FACES_FEMALE:
-                this.character.setFace(modelId);
-                this.inventory.setFaceSlot(slotId);
+                character.setFace(modelId);
+                inventory.setFaceSlot(slotId);
                 break;
             case CLOTHING_GLASSES_MALE:
             case CLOTHING_GLASSES_FEMALE:
-                this.character.setGlasses(modelId);
-                this.inventory.setGlassesSlot(slotId);
+                character.setGlasses(modelId);
+                inventory.setGlassesSlot(slotId);
                 break;
             case CLOTHING_ONE_PIECE_MALE:
             case CLOTHING_ONE_PIECE_FEMALE:
                 //TODO Check how we dress these items
-                //    this.top = itemId;
-                //   this.topSlot = slotId;
-                //    this.pants = 0;
-                //    this.pantsSlot = 0;
+                //    top = itemId;
+                //   topSlot = slotId;
+                //    pants = 0;
+                //    pantsSlot = 0;
                 break;
             case CLOTHING_OUTFIT_MALE:
             case CLOTHING_OUTFIT_FEMALE:
@@ -379,46 +379,46 @@ public class DanceClient {
         switch (inventoryItem.getShopItem().getCategory()) {
             case HEAD_N_HAIR_HAIRSTYLE_MALE:
             case HEAD_N_HAIR_HAIRSTYLE_FEMALE:
-                this.character.setHair(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setHairSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setHair(Character.DEFAULT_CLOTH_ID);
+                inventory.setHairSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_TOPS_MALE:
             case CLOTHING_TOPS_FEMALE:
-                this.character.setTop(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setTopSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setTop(Character.DEFAULT_CLOTH_ID);
+                inventory.setTopSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_BOTTOMS_MALE:
             case CLOTHING_BOTTOMS_FEMALE:
-                this.character.setPants(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setPantsSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setPants(Character.DEFAULT_CLOTH_ID);
+                inventory.setPantsSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_GLOVES_MALE:
             case CLOTHING_GLOVES_FEMALE:
-                this.character.setGloves(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setGlovesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setGloves(Character.DEFAULT_CLOTH_ID);
+                inventory.setGlovesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_SHOES_MALE:
             case CLOTHING_SHOES_FEMALE:
-                this.character.setShoes(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setShoesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setShoes(Character.DEFAULT_CLOTH_ID);
+                inventory.setShoesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case HEAD_N_HAIR_FACES_MALE:
             case HEAD_N_HAIR_FACES_FEMALE:
-                this.character.setFace(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setFaceSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setFace(Character.DEFAULT_CLOTH_ID);
+                inventory.setFaceSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_GLASSES_MALE:
             case CLOTHING_GLASSES_FEMALE:
-                this.character.setGlasses(Character.DEFAULT_CLOTH_ID);
-                this.inventory.setGlassesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
+                character.setGlasses(Character.DEFAULT_CLOTH_ID);
+                inventory.setGlassesSlot(InventoryItem.NOT_EQUIPPED_SLOT_ID);
                 break;
             case CLOTHING_ONE_PIECE_MALE:
             case CLOTHING_ONE_PIECE_FEMALE:
                 //TODO Check how we dress these items
-                //    this.top = itemId;
-                //   this.topSlot = slotId;
-                //    this.pants = 0;
-                //    this.pantsSlot = 0;
+                //    top = itemId;
+                //   topSlot = slotId;
+                //    pants = 0;
+                //    pantsSlot = 0;
                 break;
             case CLOTHING_OUTFIT_MALE:
             case CLOTHING_OUTFIT_FEMALE:

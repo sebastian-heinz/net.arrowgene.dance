@@ -44,26 +44,23 @@ package net.arrowgene.dance.server.util;
 
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerConfig;
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.lang.management.LockInfo;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MonitorInfo;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
+import java.lang.management.*;
 
 public class DeadLockDetector extends Thread {
 
+
+    private static final Logger logger = LogManager.getLogger(DeadLockDetector.class);
+
     private final ThreadMXBean tmx;
     private ServerConfig config;
-    private Logger logger;
 
     public DeadLockDetector(DanceServer server) {
         super("DeadLockDetector");
         tmx = ManagementFactory.getThreadMXBean();
         this.config = server.getServerConfig();
-        this.logger = server.getLogger();
     }
 
     @Override
@@ -113,11 +110,11 @@ public class DeadLockDetector extends Thread {
                             info.append(ServerConfig.EOL);
                         }
                     }
-                    this.logger.writeLog(LogType.WARNING, "DeadLockDetector", "run", info.toString());
+                    logger.warn(String.format("DeadLock detected: %s", info.toString()));
                 }
-                Thread.sleep(this.config.getDebugDetectDeadlockMS());
-            } catch (Exception e) {
-                this.logger.writeLog(e);
+                Thread.sleep(config.getDebugDetectDeadlockMS());
+            } catch (Exception ex) {
+                logger.error(ex);
             }
         }
     }

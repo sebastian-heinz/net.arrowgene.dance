@@ -24,18 +24,22 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
-import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.library.models.character.ControllerType;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.DanceServer;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.packet.builder.RoomPacket;
 import net.arrowgene.dance.server.room.Room;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _2004_x7D4_LOBBY_REQUEST_CREATE_ROOM extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_2004_x7D4_LOBBY_REQUEST_CREATE_ROOM.class);
 
     public _2004_x7D4_LOBBY_REQUEST_CREATE_ROOM(DanceServer server) {
         super(server);
@@ -50,7 +54,7 @@ public class _2004_x7D4_LOBBY_REQUEST_CREATE_ROOM extends HandlerBase {
 
         Room room = client.getChannel().createRoom(this.server.getSongManager(), client, roomName, roomPassword, ControllerType.Keyboard);
 
-        getLogger().writeLog(LogType.CLIENT, "created room: " + room.getName(), client);
+        logger.info(String.format("created room '%s' (%s)", room.getName(), client));
 
         Packet answerPacket = RoomPacket.getInstance().getCreateRoomPacket(client, client.getRoom());
         client.sendPacket(answerPacket);

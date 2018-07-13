@@ -25,15 +25,19 @@
 package net.arrowgene.dance.server.tcp.io.perconnection;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.tcp.io.ClientManager;
 import net.arrowgene.dance.server.tcp.io.TcpClientIO;
 import net.arrowgene.dance.server.tcp.io.TcpServerIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class TPerClientManager extends ClientManager {
+
+
+    private static final Logger logger = LogManager.getLogger(TPerClientManager.class);
 
     private final Object clientAccessLock = new Object();
     private volatile boolean isRunning;
@@ -49,12 +53,12 @@ public class TPerClientManager extends ClientManager {
     public void start() {
         this.clients.clear();
         this.isRunning = true;
-        super.getLogger().writeLog(LogType.SERVER, "TPerClientManager", "start", "Client Manager started, accepting clients");
+        logger.info("Client Manager started, accepting clients");
     }
 
     public void stop() {
         this.isRunning = false;
-        super.getLogger().writeLog(LogType.SERVER, "TPerClientManager", "stop", "Disconnecting clients...");
+        logger.info("Stop, disconnecting clients...");
         synchronized (this.clientAccessLock) {
             for (TcpClientIO tcpClientIO : this.clients) {
                 tcpClientIO.setAlive(false);
@@ -65,13 +69,12 @@ public class TPerClientManager extends ClientManager {
                 }
             }
         }
-
-        super.getLogger().writeLog(LogType.SERVER, "TPerClientManager", "stop", "Client Manager stopped");
+        logger.info("Client Manager stopped");
     }
 
     @Override
     public void writeDebugInfo() {
-        super.getLogger().writeLog(LogType.DEBUG, "TPoolClientManager", "writeDebugInfo", "Clients: " + this.clients.size());
+        logger.debug(String.format("Clients: %d", clients.size()));
     }
 
     @Override
@@ -80,7 +83,7 @@ public class TPerClientManager extends ClientManager {
             synchronized (this.clientAccessLock) {
                 this.clients.add(tcpClientIO);
             }
-            TPerClientTask clientTask = new TPerClientTask(super.tcpServerIO, super.getLogger(), tcpClientIO);
+            TPerClientTask clientTask = new TPerClientTask(super.tcpServerIO, tcpClientIO);
             Thread thread = new Thread(clientTask);
             thread.setName("Client Thread:" + tcpClientIO.getIdentity());
             thread.start();

@@ -25,15 +25,18 @@
 package net.arrowgene.dance.query;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import org.apache.http.impl.bootstrap.HttpServer;
 import org.apache.http.impl.bootstrap.ServerBootstrap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryServer {
+
+    private static final Logger logger = LogManager.getLogger(QueryServer.class);
 
 
     private List<QueryEndpoint> queryEndpoints;
@@ -58,9 +61,9 @@ public class QueryServer {
             .create();
         try {
             queryServer.start();
-            this.server.getLogger().writeLog(LogType.SERVER, "Query Server started on port: " + port);
+            logger.info(String.format("Query Server started on port: %d", port));
         } catch (IOException e) {
-            this.server.getLogger().writeLog(e);
+            logger.error(e);
         }
     }
 

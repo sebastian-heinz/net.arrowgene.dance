@@ -24,11 +24,9 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.database.Database;
-import net.arrowgene.dance.log.Logger;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 
@@ -61,12 +59,5 @@ public abstract class HandlerBase {
      */
     protected Database getDatabase() {
         return this.server.getDatabase();
-    }
-
-    /**
-     * Always returns the current logger instance of the server.
-     */
-    protected ServerLogger getLogger() {
-        return this.server.getLogger();
     }
 }

@@ -27,15 +27,19 @@ package net.arrowgene.dance.server.inventory;
 
 import net.arrowgene.dance.library.models.item.Inventory;
 import net.arrowgene.dance.library.models.item.InventoryItem;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryManager extends ServerComponent {
+
+
+    private static final Logger logger = LogManager.getLogger(InventoryManager.class);
 
     private final Object inventoriesLock = new Object();
 
@@ -89,7 +93,7 @@ public class InventoryManager extends ServerComponent {
 
     @Override
     public void writeDebugInfo() {
-        getLogger().writeLog(LogType.DEBUG, "InventoryManager", "writeDebugInfo", "Inventories: " + this.inventories.size());
+        logger.debug(String.format("Inventories: %d", inventories.size()));
     }
 
     public Inventory getInventoryByCharacterId(int characterId) {

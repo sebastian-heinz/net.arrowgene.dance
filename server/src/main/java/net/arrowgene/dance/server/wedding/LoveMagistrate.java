@@ -29,10 +29,11 @@ import net.arrowgene.dance.library.models.item.InventoryItem;
 import net.arrowgene.dance.library.models.wedding.RingType;
 import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import net.arrowgene.dance.library.models.wedding.WeddingState;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,6 +44,9 @@ import java.util.List;
  * Manages wedding records.
  */
 public class LoveMagistrate extends ServerComponent {
+
+
+    private static final Logger logger = LogManager.getLogger(LoveMagistrate.class);
 
     private static final int MAX_TEXT_LENGTH = 100;
     private static final int MIN_LEVEL = 10;
@@ -113,7 +117,7 @@ public class LoveMagistrate extends ServerComponent {
     @Override
     public void writeDebugInfo() {
         synchronized (this.weddingRecordsLock) {
-            getLogger().writeLog(LogType.DEBUG, "LoveMagistrate", "writeDebugInfo", "Wedding Records: " + this.weddingRecords.size());
+            logger.debug(String.format("Wedding Records: %d", weddingRecords.size()));
         }
     }
 

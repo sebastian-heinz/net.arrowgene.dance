@@ -24,22 +24,22 @@
 
 package net.arrowgene.dance.server.packet;
 
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.client.DanceClient;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.handle.HandlerBase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PacketHandler {
 
-    private ServerLogger logger;
+
+    private static final Logger logger = LogManager.getLogger(PacketHandler.class);
     private Map<PacketType, HandlerBase> packetHandles;
 
-    public PacketHandler(ServerLogger logger) {
+    public PacketHandler() {
         this.packetHandles = new HashMap<PacketType, HandlerBase>();
-        this.logger = logger;
     }
 
     public void addHandle(PacketType type, HandlerBase handler) {
@@ -48,7 +48,8 @@ public class PacketHandler {
 
     public void handle(ReadPacket packet, DanceClient sender) {
         if (packet != null) {
-            this.logger.writePacketLog(packet, sender, LogType.REQUEST_PACKET);
+            // TODO log packet
+            // this.logger.writePacketLog(packet, sender, LogType.REQUEST_PACKET);
             HandlerBase handler = this.packetHandles.get(packet.getPacketType());
             if (handler != null) {
                 SendPacket[] packets = handler.handle(packet, sender);
@@ -61,7 +62,7 @@ public class PacketHandler {
                 }
             }
         } else {
-            this.logger.writeLog(LogType.CLIENT, "PacketHandler", "handle", "Read packet is null", sender);
+            logger.info(String.format("Read packet is null (%s)", sender));
         }
     }
 

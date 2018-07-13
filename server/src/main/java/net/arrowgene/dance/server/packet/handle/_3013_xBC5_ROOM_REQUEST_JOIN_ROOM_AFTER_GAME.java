@@ -24,14 +24,18 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _3013_xBC5_ROOM_REQUEST_JOIN_ROOM_AFTER_GAME extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_3013_xBC5_ROOM_REQUEST_JOIN_ROOM_AFTER_GAME.class);
 
     public _3013_xBC5_ROOM_REQUEST_JOIN_ROOM_AFTER_GAME(DanceServer server) {
         super(server);
@@ -40,7 +44,7 @@ public class _3013_xBC5_ROOM_REQUEST_JOIN_ROOM_AFTER_GAME extends HandlerBase {
     @Override
     public SendPacket[] handle(ReadPacket packet, DanceClient client) {
         client.getRoom().enterRoomAfterGame(client);
-        getLogger().writeLog(LogType.CLIENT, "joined room: '" + client.getRoom().getName() + "' after game", client);
+        logger.info(String.format("joined room '%s' after game (%s)", client.getRoom().getName(), client));
         return null;
     }
 }

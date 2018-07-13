@@ -24,18 +24,22 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.channel.Channel;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
 
 public class _2010_x7DA_LOBBY_REQUEST_ALL_LIST extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_2010_x7DA_LOBBY_REQUEST_ALL_LIST.class);
 
     public _2010_x7DA_LOBBY_REQUEST_ALL_LIST(DanceServer server) {
         super(server);
@@ -67,7 +71,7 @@ public class _2010_x7DA_LOBBY_REQUEST_ALL_LIST extends HandlerBase {
                 answerPacket.addInt32(u.getCharacter().getFlag());
             }
         } else {
-            getLogger().writeLog(LogType.ERROR, "_2010_x7DA_LOBBY_REQUEST_ALL_LIST", "handle", "Client has no channel", client);
+            logger.error(String.format("Client has no channel (%s)", client));
         }
 
         answerPacket.addByte(0);

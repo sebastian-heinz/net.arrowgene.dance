@@ -25,13 +25,15 @@
 package net.arrowgene.dance.server.task;
 
 
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Task implements Runnable {
+
+    private static final Logger logger = LogManager.getLogger(Task.class);
 
     private int initialDelay;
     private int delay;
@@ -39,13 +41,11 @@ public abstract class Task implements Runnable {
     private TimeUnit timeUnit;
     private String id;
     protected String name;
-    protected Logger logger;
 
     /**
      * Creates a new task that executes instantly on time.
      */
-    public Task(Logger logger) {
-        this.logger = logger;
+    public Task() {
         this.repeat = false;
         this.initialDelay = 0;
         this.delay = 0;
@@ -58,8 +58,7 @@ public abstract class Task implements Runnable {
      *
      * @param initialDelay time before the task runs for the first time.
      */
-    public Task(int initialDelay, TimeUnit timeUnit, Logger logger) {
-        this.logger = logger;
+    public Task(int initialDelay, TimeUnit timeUnit) {
         this.repeat = false;
         this.initialDelay = initialDelay;
         this.delay = 0;
@@ -73,8 +72,7 @@ public abstract class Task implements Runnable {
      * @param initialDelay time before the task runs for the first time.
      * @param delay        time to wait after the tasks completion before running again.
      */
-    public Task(int initialDelay, int delay, TimeUnit timeUnit, Logger logger) {
-        this.logger = logger;
+    public Task(int initialDelay, int delay, TimeUnit timeUnit) {
         this.repeat = true;
         this.initialDelay = initialDelay;
         this.delay = delay;
@@ -112,8 +110,8 @@ public abstract class Task implements Runnable {
 
     @Override
     public void run() {
-        this.logger.writeLog(LogType.SERVER, "Task", "run", "Started Task: " + this.getIdentity());
+        logger.info(String.format("Started Task: %s", getIdentity()));
         this.execute();
-        this.logger.writeLog(LogType.SERVER, "Task", "run", "Finished Task: " + this.getIdentity());
+        logger.info(String.format("Finished Task: %s", getIdentity()));
     }
 }

@@ -44,10 +44,6 @@ import java.util.List;
 
 public abstract class Database {
 
-    public Database() {
-
-    }
-
     public abstract boolean insertAccount(Account account);
 
     public abstract boolean insertPassword(String accountName, String newPasswordHash);

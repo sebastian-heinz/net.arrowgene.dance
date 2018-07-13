@@ -25,7 +25,6 @@
 package net.arrowgene.dance.server.tcp.io.threadpool;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.tcp.io.TcpClientIO;
 
 import java.net.Socket;
@@ -40,8 +39,8 @@ public class TPoolClient extends TcpClientIO {
      */
     private long lastPacketReceived;
 
-    public TPoolClient(Socket socket, ServerLogger logger) {
-        super(socket, logger);
+    public TPoolClient(Socket socket) {
+        super(socket);
 
         // The client will be disconnected instantly if its new and never read a packet.
         // This gives newly connected clients a grace period to be alive without

@@ -24,16 +24,20 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.Packet;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.packet.builder.RoomPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _4010_xFAA_GAME_REQUEST_START_GAME extends HandlerBase {
+
+
+    private static final Logger logger = LogManager.getLogger(_4010_xFAA_GAME_REQUEST_START_GAME.class);
 
     public _4010_xFAA_GAME_REQUEST_START_GAME(DanceServer server) {
         super(server);
@@ -49,7 +53,7 @@ public class _4010_xFAA_GAME_REQUEST_START_GAME extends HandlerBase {
 
             client.getRoom().sendPacket(answerPacket);
 
-            getLogger().writeLog(LogType.CLIENT, "started game in room: " + client.getRoom().getName(), client);
+            logger.info(String.format("started game in room '%s' (%s)", client.getRoom().getName(), client));
 
         } else {
             Packet answerPacket = RoomPacket.getInstance().getStartGameErrorPacket(1);

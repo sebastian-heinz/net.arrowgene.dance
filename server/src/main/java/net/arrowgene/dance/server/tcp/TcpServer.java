@@ -26,8 +26,6 @@ package net.arrowgene.dance.server.tcp;
 
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerConfig;
-import net.arrowgene.dance.log.Logger;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.packet.ReadPacket;
 
 import java.net.InetAddress;
@@ -50,10 +48,6 @@ public abstract class TcpServer {
         this.disconnectedListeners = new ArrayList<DisconnectedListener>();
         this.connectedListeners = new ArrayList<ConnectedListener>();
         this.receivedPacketListener = new ArrayList<ReceivedPacketListener>();
-    }
-
-    public ServerLogger getLogger() {
-        return this.server.getLogger();
     }
 
     public ServerConfig getConfig() {

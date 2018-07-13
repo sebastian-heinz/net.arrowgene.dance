@@ -33,12 +33,10 @@ import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.group.GroupManager;
 import net.arrowgene.dance.server.inventory.InventoryManager;
 import net.arrowgene.dance.server.lobby.Lobby;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.packet.PacketHandler;
 import net.arrowgene.dance.server.packet.PacketHandlerBuilder;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.post.PostOffice;
-
 import net.arrowgene.dance.server.shop.Shop;
 import net.arrowgene.dance.server.song.SongManager;
 import net.arrowgene.dance.server.task.TaskManager;
@@ -47,10 +45,15 @@ import net.arrowgene.dance.server.tcp.io.TcpServerIO;
 import net.arrowgene.dance.server.tcp.nio.TcpServerNIO;
 import net.arrowgene.dance.server.util.DeadLockDetector;
 import net.arrowgene.dance.server.wedding.LoveMagistrate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
 public class DanceServer implements ConnectedListener, DisconnectedListener, ReceivedPacketListener, Thread.UncaughtExceptionHandler {
+
+
+    private static final Logger logger = LogManager.getLogger(DanceServer.class);
 
     public static long getUnixTimeNow() {
         return GregorianCalendar.getInstance().getTimeInMillis() / 1000;
@@ -60,12 +63,10 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
         return DanceServer.class.getPackage().getImplementationVersion();
     }
 
-
     private final Object clientLookupLock = new Object();
 
     private boolean online;
     private long startTime;
-    private ServerLogger logger;
     private TcpServer tcpServer;
     private Database database;
     private Lobby lobby;
@@ -98,13 +99,9 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
      * @param serverConfig The configuration.
      */
     public DanceServer(ServerConfig serverConfig) {
-        this.online = false;
+        online = false;
         this.serverConfig = serverConfig;
-        this.initServer();
-    }
-
-    public ServerLogger getLogger() {
-        return logger;
+        initialize();
     }
 
     public TcpServer getTcpServer() {
@@ -140,23 +137,23 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
     }
 
     public Shop getShop() {
-        return this.shop;
+        return shop;
     }
 
     public PostOffice getPostOffice() {
-        return this.postOffice;
+        return postOffice;
     }
 
     public InventoryManager getInventoryManager() {
-        return this.inventoryManager;
+        return inventoryManager;
     }
 
     public LoveMagistrate getLoveMagistrate() {
-        return this.loveMagistrate;
+        return loveMagistrate;
     }
 
     public CharacterManager getCharacterManager() {
-        return this.characterManager;
+        return characterManager;
     }
 
     public boolean isOnline() {
@@ -167,77 +164,72 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
      * Starts the server
      */
     public void start() {
-        this.startTime = getUnixTimeNow();
-        for (String config : this.serverConfig.getCurrentConfiguration()) {
-            this.logger.writeLog(LogType.SERVER, "DanceServer", "start", config);
+        startTime = getUnixTimeNow();
+        logger.info("Current Server Configuration:");
+        for (String config : serverConfig.getCurrentConfiguration()) {
+            logger.info(config);
         }
-        this.tcpServer.start();
-        for (ServerComponent serverComponent : this.serverComponents) {
+        tcpServer.start();
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.start();
         }
-        this.online = true;
+        online = true;
     }
 
     /**
      * Stops the server
      * <p>
-     * 1) Stop accepting new connections (TODO: boolean to toggle maintenance message for trying to login)
+     * TODO ensure clean shutdown
+     * 1) Stop accepting new connections
      * 2) Save the server state
      * 3) Save all client states
      * 4) Disconnect all clients
      * 5) Shutdown Server
      */
     public void stop() {
-        this.online = false;
-        this.save();
-        for (ServerComponent serverComponent : this.serverComponents) {
+        online = false;
+        save();
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.stop();
         }
-        this.tcpServer.stop();
-        this.logger.saveLogs();
-    }
-
-    public void load() {
-        for (ServerComponent serverComponent : this.serverComponents) {
-            serverComponent.load();
-        }
+        tcpServer.stop();
     }
 
     /**
      * Updates the database with the current state of the server.
      */
     public void save() {
-        for (ServerComponent serverComponent : this.serverComponents) {
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.save();
         }
     }
 
     public void writeDebugInfo() {
-        this.logger.writeLog(LogType.DEBUG, "DanceServer", "writeDebugInfo", "Start Time: " + this.startTime);
-        this.logger.writeLog(LogType.DEBUG, "DanceServer", "writeDebugInfo", "Uptime: " + (getUnixTimeNow() - this.startTime));
-        synchronized (this.clientLookupLock) {
-            this.logger.writeLog(LogType.DEBUG, "DanceServer", "writeDebugInfo", "Client Lookups: " + this.clientLookup.size());
+        logger.debug(String.format("Start Time: %d", startTime));
+        logger.debug(String.format("Uptime: %d", getUnixTimeNow() - startTime));
+        synchronized (clientLookupLock) {
+            logger.debug(String.format("Client Lookups: %d", clientLookup.size()));
         }
-        this.logger.writeLog(LogType.DEBUG, "DanceServer", "writeDebugInfo", "Server Components: " + this.serverComponents.size());
-        this.tcpServer.writeDebugInfo();
-        for (ServerComponent serverComponent : this.serverComponents) {
+        logger.debug(String.format("Server Components: %d", serverComponents.size()));
+        tcpServer.writeDebugInfo();
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.writeDebugInfo();
         }
     }
 
     public void clientAuthenticated(DanceClient client) {
-        for (ServerComponent serverComponent : this.serverComponents) {
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.clientAuthenticated(client);
         }
     }
 
     @Override
     public void clientConnected(TcpClient tcpClient) {
-        DanceClient client = new DanceClient(tcpClient, this.logger);
-        synchronized (this.clientLookupLock) {
-            this.clientLookup.put(tcpClient, client);
+        DanceClient client = new DanceClient(tcpClient);
+        synchronized (clientLookupLock) {
+            clientLookup.put(tcpClient, client);
         }
-        for (ServerComponent serverComponent : this.serverComponents) {
+        for (ServerComponent serverComponent : serverComponents) {
             serverComponent.clientConnected(client);
         }
     }
@@ -245,81 +237,69 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
     @Override
     public void receivedPacket(TcpClient tcpClient, ReadPacket readPacket) {
         DanceClient client;
-        synchronized (this.clientLookupLock) {
-            client = this.clientLookup.get(tcpClient);
+        synchronized (clientLookupLock) {
+            client = clientLookup.get(tcpClient);
         }
         if (client == null) {
             if (tcpClient == null) {
-                this.logger.writeLog(LogType.CLIENT, "DanceServer", "receivedPacket", "Couldn't lookup DanceClient because key 'TcpClient' is null.");
+                logger.error("Couldn't lookup DanceClient because key 'TcpClient' is null.");
             } else {
-                this.logger.writeLog(LogType.CLIENT, "DanceServer", "receivedPacket", "Missing value DanceClient for key TcpClient", tcpClient);
-            }
-        } else if (this.serverConfig.isDebugMode()) {
-            try {
-                this.packetHandler.handle(readPacket, client);
-            } catch (Throwable exception) {
-                this.logger.writeLog(LogType.ERROR, "DanceServer", "receivedPacket", "Debug Mode prevent an error");
-                this.logger.writeLog(exception, tcpClient);
+                logger.error(String.format("Missing value DanceClient for key TcpClient (%s)", tcpClient));
             }
         } else {
-            this.packetHandler.handle(readPacket, client);
+            try {
+                packetHandler.handle(readPacket, client);
+            } catch (Throwable ex) {
+                logger.error(String.format("%s (%s)", ex.getMessage(), tcpClient));
+                logger.error(ex);
+            }
         }
     }
 
     @Override
     public void clientDisconnected(TcpClient tcpClient) {
         DanceClient client;
-        synchronized (this.clientLookupLock) {
-            client = this.clientLookup.remove(tcpClient);
+        synchronized (clientLookupLock) {
+            client = clientLookup.remove(tcpClient);
         }
         if (client != null) {
-            for (ServerComponent serverComponent : this.serverComponents) {
+            for (ServerComponent serverComponent : serverComponents) {
                 serverComponent.clientDisconnected(client);
             }
         }
     }
 
-    private void initServer() {
-        // TODO
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-           //    SQLiteController.this.close();
-            }
-        });
+    private void initialize() {
+        logger.info("Initializing Server");
+        logger.info(String.format("Version: %s", DanceServer.getBuildVersion()));
 
-        this.logger = new ServerLogger(this.serverConfig);
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         Thread.setDefaultUncaughtExceptionHandler(this);
 
-        this.clientLookup = new HashMap<>();
-        this.logger = new ServerLogger(this.serverConfig);
-        this.database = new SQLiteDb(this.logger);
+        clientLookup = new HashMap<>();
+        database = new SQLiteDb();
 
-        this.logger.writeLog(LogType.SERVER, "DanceServer", "initServer", "Version:" + DanceServer.getBuildVersion());
+        deadlockDetectThread = new DeadLockDetector(this);
+        deadlockDetectThread.setDaemon(true);
+        deadlockDetectThread.start();
 
-        if (this.serverConfig.isDebugMode()) {
-            deadlockDetectThread = new DeadLockDetector(this);
-            deadlockDetectThread.setDaemon(true);
-            deadlockDetectThread.start();
-        }
-
-        switch (this.serverConfig.getServerType()) {
+        switch (serverConfig.getServerType()) {
             case IO:
-                this.tcpServer = new TcpServerIO(this);
+                tcpServer = new TcpServerIO(this);
                 break;
             case NIO:
-                this.tcpServer = new TcpServerNIO(this);
+                tcpServer = new TcpServerNIO(this);
                 break;
             default:
-                this.logger.writeLog(LogType.ERROR,
-                    "DanceServer::initServer:Server Type not found, check settings for [ServerType] value");
+                logger.fatal("Server Type not found, check settings for [ServerType] value");
                 break;
         }
 
-        this.tcpServer.addConnectedListener(this);
-        this.tcpServer.addDisconnectedListener(this);
-        this.tcpServer.addReceivedPacketListener(this);
+        tcpServer.addConnectedListener(this);
+        tcpServer.addDisconnectedListener(this);
+        tcpServer.addReceivedPacketListener(this);
 
-        this.packetHandler = new PacketHandlerBuilder(this).build();
+        packetHandler = new PacketHandlerBuilder(this).build();
 
         // Server Components
         this.serverComponents = new ArrayList<>();
@@ -334,40 +314,49 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
 
 
         this.lobby = new Lobby(this);
-        this.serverComponents.add(this.lobby);
+        this.serverComponents.add(lobby);
 
-        this.chatManager = new ChatManager(this);
-        this.serverComponents.add(this.chatManager);
+        chatManager = new ChatManager(this);
+        serverComponents.add(chatManager);
 
-        this.groupManager = new GroupManager(this);
-        this.serverComponents.add(this.groupManager);
+        groupManager = new GroupManager(this);
+        serverComponents.add(groupManager);
 
-        this.songManager = new SongManager(this);
-        this.serverComponents.add(this.songManager);
+        songManager = new SongManager(this);
+        serverComponents.add(songManager);
 
-        this.shop = new Shop(this);
-        this.serverComponents.add(this.shop);
+        shop = new Shop(this);
+        serverComponents.add(shop);
 
-        this.postOffice = new PostOffice(this);
-        this.serverComponents.add(this.postOffice);
+        postOffice = new PostOffice(this);
+        serverComponents.add(postOffice);
 
-        this.loveMagistrate = new LoveMagistrate(this);
-        this.serverComponents.add(this.loveMagistrate);
+        loveMagistrate = new LoveMagistrate(this);
+        serverComponents.add(loveMagistrate);
 
-        this.inventoryManager = new InventoryManager(this);
-        this.serverComponents.add(this.inventoryManager);
+        inventoryManager = new InventoryManager(this);
+        serverComponents.add(inventoryManager);
 
-        this.taskManager = new TaskManager(this);
-        this.serverComponents.add(this.taskManager);
+        taskManager = new TaskManager(this);
+        serverComponents.add(taskManager);
 
-        Collections.sort(this.serverComponents, new ServerComponentPriority());
+        Collections.sort(serverComponents, new ServerComponentPriority());
 
-        this.load();
+        for (ServerComponent serverComponent : serverComponents) {
+            serverComponent.load();
+        }
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        this.logger.writeLog(LogType.ERROR, "DanceServer", "uncaughtException", "Thread Died: " + t.getName());
-        this.logger.writeLog(e);
+        logger.error(String.format("%s (Thread Name: %s)", e.getMessage(), t.getName()));
+        logger.error(e);
+    }
+
+    private class ShutdownHook extends Thread {
+        @Override
+        public void run() {
+            logger.info("ShutdownHook triggered");
+        }
     }
 }

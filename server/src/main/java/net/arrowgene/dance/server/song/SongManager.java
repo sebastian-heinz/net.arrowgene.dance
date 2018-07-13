@@ -26,10 +26,11 @@ package net.arrowgene.dance.server.song;
 
 
 import net.arrowgene.dance.library.models.song.Song;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,8 @@ import java.util.List;
 
 public class SongManager extends ServerComponent {
 
+
+    private static final Logger logger = LogManager.getLogger(SongManager.class);
     private ArrayList<Song> songs = new ArrayList<Song>();
 
     public SongManager(DanceServer server) {
@@ -81,7 +84,7 @@ public class SongManager extends ServerComponent {
 
     @Override
     public void writeDebugInfo() {
-        getLogger().writeLog(LogType.DEBUG, "SongManager", "writeDebugInfo", "Songs: " + this.songs.size());
+        logger.debug(String.format("Songs:  %d", songs.size()));
     }
 
     public void reloadSongs() {

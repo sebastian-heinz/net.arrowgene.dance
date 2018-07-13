@@ -27,8 +27,6 @@ package net.arrowgene.dance.server.tcp.io;
 
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerConfig;
-import net.arrowgene.dance.log.Logger;
-import net.arrowgene.dance.server.ServerLogger;
 
 
 public abstract class ClientManager {
@@ -39,10 +37,6 @@ public abstract class ClientManager {
     public ClientManager(DanceServer server, TcpServerIO tcpServerIO) {
         this.server = server;
         this.tcpServerIO = tcpServerIO;
-    }
-
-    protected ServerLogger getLogger() {
-        return this.server.getLogger();
     }
 
     protected ServerConfig getConfig() {

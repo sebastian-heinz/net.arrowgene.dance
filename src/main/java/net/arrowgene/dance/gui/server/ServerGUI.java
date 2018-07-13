@@ -27,9 +27,8 @@ package net.arrowgene.dance.gui.server;
 import net.arrowgene.dance.editor.EditorConfig;
 import net.arrowgene.dance.editor.EditorFrame;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.Log;
-import net.arrowgene.dance.log.LogListener;
-import net.arrowgene.dance.log.LogType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,7 +37,9 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 
-public class ServerGUI extends EditorFrame implements ActionListener, LogListener {
+public class ServerGUI extends EditorFrame implements ActionListener {
+
+    private static final Logger logger = LogManager.getLogger(ServerGUI.class);
 
     private JPanel panel1;
     private JTextPane logPane;
@@ -106,18 +107,17 @@ public class ServerGUI extends EditorFrame implements ActionListener, LogListene
             this.start();
         } else if (e.getActionCommand().equals("stop")) {
             this.stop();
-        } else if (e.getActionCommand().equals("save-logs")) {
-            this.server.getLogger().saveLogs();
         } else if (e.getActionCommand().equals("new-instance")) {
             this.newInstance();
         }
     }
 
-    @Override
-    public void writeLog(Log log) {
-        logPane.setText(logPane.getText() + log.toString() + "\n");
-        int extent = logScroll.getVerticalScrollBar().getModel().getExtent();
-        logScroll.getVerticalScrollBar().setValue(logScroll.getVerticalScrollBar().getValue() + extent);
+
+    // TODO display logs from log4j in window
+    public void OnwriteLog() {
+        // logPane.setText(logPane.getText() + log.toString() + "\n");
+        // int extent = logScroll.getVerticalScrollBar().getModel().getExtent();
+        // logScroll.getVerticalScrollBar().setValue(logScroll.getVerticalScrollBar().getValue() + extent);
     }
 
     public void addServerCreatedListener(ServerCreatedListener listener) {
@@ -127,10 +127,8 @@ public class ServerGUI extends EditorFrame implements ActionListener, LogListene
     private void newInstance() {
         if (this.server != null) {
             this.stop();
-            this.server.getLogger().removeListener(this);
         }
         this.server = new DanceServer();
-        this.server.getLogger().addListener(this);
         for (ServerCreatedListener listener : this.serverCreatedListener) {
             listener.serverCreated(this.server);
         }
@@ -142,7 +140,7 @@ public class ServerGUI extends EditorFrame implements ActionListener, LogListene
             this.serverToggleButton.setActionCommand("stop");
             this.serverToggleButton.setText("Stop");
         } else {
-            this.writeLog(new Log("No Server Instance", LogType.ERROR));
+            logger.error("No Server Instance");
         }
     }
 
@@ -152,7 +150,7 @@ public class ServerGUI extends EditorFrame implements ActionListener, LogListene
             this.serverToggleButton.setActionCommand("start");
             this.serverToggleButton.setText("Start");
         } else {
-            this.writeLog(new Log("No Server Instance", LogType.ERROR));
+            logger.error("No Server Instance");
         }
     }
 

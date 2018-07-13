@@ -25,7 +25,6 @@
 package net.arrowgene.dance.server.task.tasks;
 
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import net.arrowgene.dance.server.task.Task;
 
 import java.util.concurrent.TimeUnit;
@@ -38,7 +37,7 @@ public class WriteDebugInfo extends Task {
     private DanceServer server;
 
     public WriteDebugInfo(DanceServer server) {
-        super(server.getServerConfig().getDebugWriteInfoMS(), server.getServerConfig().getDebugWriteInfoMS(), TimeUnit.MILLISECONDS, server.getLogger());
+        super(server.getServerConfig().getDebugWriteInfoMS(), server.getServerConfig().getDebugWriteInfoMS(), TimeUnit.MILLISECONDS);
         this.server = server;
     }
 
@@ -49,7 +48,7 @@ public class WriteDebugInfo extends Task {
 
     @Override
     public void execute() {
-        this.server.writeDebugInfo();
+        server.writeDebugInfo();
     }
 
 

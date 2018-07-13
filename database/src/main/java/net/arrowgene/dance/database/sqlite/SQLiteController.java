@@ -24,10 +24,11 @@
 
 package net.arrowgene.dance.database.sqlite;
 
+import net.arrowgene.dance.database.Database;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
+import java.io.*;
 import java.sql.*;
 
 public class SQLiteController {
@@ -40,6 +41,24 @@ public class SQLiteController {
 
     public SQLiteController(String databasePath) {
         this.databasePath = databasePath;
+    }
+
+    public boolean initialize() {
+        boolean success;
+        try {
+            File dbFile = new File(databasePath);
+            boolean dbFileExists = dbFile.exists();
+            Class.forName(JDBC_DRIVER);
+            connection = DriverManager.getConnection(getConnectionString());
+            if (!dbFileExists) {
+                prepareDatabase();
+            }
+            success = true;
+        } catch (Exception ex) {
+            logger.error(ex);
+            success = false;
+        }
+        return success;
     }
 
     public Statement createStatement() {
@@ -79,26 +98,6 @@ public class SQLiteController {
         return autoInc;
     }
 
-    public void delete() {
-        File dbFile = new File(databasePath);
-        if (dbFile.exists()) {
-            dbFile.delete();
-        }
-    }
-
-    public boolean initialize() {
-        boolean success;
-        try {
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(getConnectionString());
-            success = true;
-        } catch (Exception ex) {
-            logger.error(ex);
-            success = false;
-        }
-        return success;
-    }
-
     public void close() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -107,6 +106,58 @@ public class SQLiteController {
                     logger.info("SQLite Connection Closed");
                 }
             }
+        } catch (Exception ex) {
+            logger.error(ex);
+        }
+    }
+
+    public void deleteDatabase() {
+        logger.info("Deleting SQLiteDb");
+        File dbFile = new File(databasePath);
+        if (dbFile.exists()) {
+            dbFile.delete();
+        }
+    }
+
+    private void prepareDatabase() {
+
+        logger.info("Preparing SQLiteDb with structure and default data");
+        importFile("ag_structure.sql");
+        importFile("ag_items.sql");
+        importFile("ag_songs.sql");
+        importFile("ag_default.sql");
+    }
+
+    private void importFile(String fileName) {
+        InputStream sqlStructureFile = Database.class.getResourceAsStream(fileName);
+        if (sqlStructureFile != null) {
+            logger.info(String.format("Importing %s into SQLiteDb", fileName));
+            StringBuilder sb = new StringBuilder();
+            try {
+                BufferedReader bfReader = new BufferedReader(new InputStreamReader(sqlStructureFile));
+                String sCurrentLine;
+                while ((sCurrentLine = bfReader.readLine()) != null) {
+                    sb.append(sCurrentLine).append("\n");
+                }
+                String[] strSQL = sb.toString().split(";");
+                for (String aStrSQL : strSQL) {
+                    if (!aStrSQL.trim().equals("")) {
+                        executeSQL(aStrSQL + ";");
+                    }
+                }
+            } catch (Exception ex) {
+                logger.error(ex);
+            }
+        } else {
+            logger.fatal(String.format("Could not find file %s", fileName));
+        }
+    }
+
+    private void executeSQL(String sql) {
+        Statement stmt = createStatement();
+        try {
+            stmt.execute(sql);
+            stmt.close();
         } catch (Exception ex) {
             logger.error(ex);
         }

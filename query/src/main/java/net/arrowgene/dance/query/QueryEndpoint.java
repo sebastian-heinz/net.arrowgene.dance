@@ -32,12 +32,13 @@ import io.jsonwebtoken.impl.crypto.MacProvider;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountStateType;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
@@ -45,6 +46,8 @@ import java.io.IOException;
 
 public abstract class QueryEndpoint implements HttpRequestHandler {
 
+
+    private static final Logger logger = LogManager.getLogger(QueryEndpoint.class);
     private static final int BEARER_LENGTH = 6;
     protected static final SecretKey QUERY_KEY = MacProvider.generateKey();
 
@@ -71,7 +74,7 @@ public abstract class QueryEndpoint implements HttpRequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
-        QueryRequest queryRequest = new QueryRequest(httpRequest, httpResponse, httpContext, this.getRoute(), this.server.getLogger());
+        QueryRequest queryRequest = new QueryRequest(httpRequest, httpResponse, httpContext, this.getRoute());
         if (this.isAuthenticatedRoute()) {
             String authorizationValue = queryRequest.getRequestHeaders().get("Authorization");
             if (authorizationValue != null) {
@@ -141,11 +144,7 @@ public abstract class QueryEndpoint implements HttpRequestHandler {
             if (queryRequest.getHost().equals(this.server.getServerConfig().getQueryMasterHost())) {
                 return true;
             }
-            this.server.getLogger().writeLog(LogType.HACK,
-                "QueryEndpoint",
-                "authenticate",
-                "Got query master key from an untrusted source (" + queryRequest.getHost() + "), consider changing the key."
-            );
+            logger.fatal("Got query master key from an untrusted source (" + queryRequest.getHost() + "), consider changing the key.");
         }
         return false;
     }
@@ -166,7 +165,7 @@ public abstract class QueryEndpoint implements HttpRequestHandler {
         } catch (SignatureException e) {
             //don't trust the JWT!
         } catch (Exception e) {
-            this.server.getLogger().writeLog(e);
+            logger.error(e);
         }
         return false;
     }

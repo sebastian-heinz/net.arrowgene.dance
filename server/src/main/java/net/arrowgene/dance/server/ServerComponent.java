@@ -26,7 +26,6 @@ package net.arrowgene.dance.server;
 
 import net.arrowgene.dance.database.Database;
 import net.arrowgene.dance.server.client.DanceClient;
-import net.arrowgene.dance.log.Logger;
 
 /**
  * A ServerComponent has the responsibility of managing a single self containing part of the server.
@@ -38,6 +37,7 @@ import net.arrowgene.dance.log.Logger;
 public abstract class ServerComponent {
 
     private int priority;
+
     protected DanceServer server;
 
     public ServerComponent(DanceServer server) {
@@ -88,13 +88,6 @@ public abstract class ServerComponent {
      */
     protected Database getDatabase() {
         return this.server.getDatabase();
-    }
-
-    /**
-     * Always returns the current logger instance of the server.
-     */
-    protected ServerLogger getLogger() {
-        return this.server.getLogger();
     }
 
     public int getPriority() {

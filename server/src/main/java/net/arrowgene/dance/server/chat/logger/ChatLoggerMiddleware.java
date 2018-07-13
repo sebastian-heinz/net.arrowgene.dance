@@ -26,66 +26,65 @@ package net.arrowgene.dance.server.chat.logger;
 
 import net.arrowgene.dance.server.chat.ChatMessage;
 import net.arrowgene.dance.server.chat.ChatMiddleware;
-import net.arrowgene.dance.log.Log;
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Logs chat messages
  */
 public class ChatLoggerMiddleware implements ChatMiddleware {
 
-  private Logger logger;
 
-  public ChatLoggerMiddleware(Logger logger) {
-    this.logger = logger;
-  }
+    private static final Logger logger = LogManager.getLogger(ChatLoggerMiddleware.class);
+    private static final Level CHAT = Level.forName("CHAT", 410);
 
-  @Override
-  public void handleMessage(ChatMessage chatMessage) {
-    Log chatLog = this.createChatLog(chatMessage);
-    this.logger.writeLog(chatLog);
-  }
-
-  private Log createChatLog(ChatMessage chatMessage) {
-
-    String text = "";
-    String account = "";
-
-    if (chatMessage.getSender() != null) {
-      if (chatMessage.getSender().getAccount() != null) {
-        account = chatMessage.getSender().getAccount().getUsername();
-      }
-      if (chatMessage.getSender().getCharacter() != null) {
-
-        text += chatMessage.getSenderCharacterName();
-        switch (chatMessage.getChatType()) {
-          case CHANNEL: {
-            text += "@";
-            text += "[CH#" + chatMessage.getSender().getChannel().getDetails().getPosition() + "]";
-            break;
-          }
-          case ROOM: {
-            text += "@";
-            text += "[CH#" + chatMessage.getSender().getChannel().getDetails().getPosition() + "]";
-            text += "[RM#" + chatMessage.getSender().getRoom().getNumber() + "]";
-            break;
-          }
-          case PRIVATE: {
-            text += "@";
-            text += "[" + chatMessage.getRecipientCharacterName() + "]";
-            break;
-          }
-          default: {
-            break;
-          }
-        }
-        text += ": ";
-        text += chatMessage.getMessage();
-      }
+    @Override
+    public void handleMessage(ChatMessage chatMessage) {
+        String chatLog = createChatLog(chatMessage);
+        logger.log(CHAT, chatLog);
     }
 
-    return new Log(text, LogType.CHAT, account);
-  }
+    private String createChatLog(ChatMessage chatMessage) {
+
+        // TODO add account info / format message
+        String text = "";
+        String account = "";
+
+        if (chatMessage.getSender() != null) {
+            if (chatMessage.getSender().getAccount() != null) {
+                account = chatMessage.getSender().getAccount().getUsername();
+            }
+            if (chatMessage.getSender().getCharacter() != null) {
+
+                text += chatMessage.getSenderCharacterName();
+                switch (chatMessage.getChatType()) {
+                    case CHANNEL: {
+                        text += "@";
+                        text += "[CH#" + chatMessage.getSender().getChannel().getDetails().getPosition() + "]";
+                        break;
+                    }
+                    case ROOM: {
+                        text += "@";
+                        text += "[CH#" + chatMessage.getSender().getChannel().getDetails().getPosition() + "]";
+                        text += "[RM#" + chatMessage.getSender().getRoom().getNumber() + "]";
+                        break;
+                    }
+                    case PRIVATE: {
+                        text += "@";
+                        text += "[" + chatMessage.getRecipientCharacterName() + "]";
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+                text += ": ";
+                text += chatMessage.getMessage();
+            }
+        }
+
+        return text;
+    }
 
 }

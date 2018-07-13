@@ -38,7 +38,7 @@ public class PacketHandlerBuilder {
 
     public PacketHandler build() {
 
-        PacketHandler handler = new PacketHandler(this.server.getLogger());
+        PacketHandler handler = new PacketHandler();
 
         handler.addHandle(PacketType.LOGIN_REQUEST_AUTHENTICATION, new _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION(this.server));
         handler.addHandle(PacketType.LOGIN_REQUEST_CHANNEL_LIST, new _1002_x3EA_LOGIN_REQUEST_CHANNEL_LIST(this.server));

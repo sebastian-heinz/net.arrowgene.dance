@@ -24,16 +24,19 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
-import net.arrowgene.dance.log.LogType;
+import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.room.Room;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class _3005_xBBD_ROOM_REQUEST_ENTER_LOBBY_FROM_ROOM extends HandlerBase {
+
+    private static final Logger logger = LogManager.getLogger(_3005_xBBD_ROOM_REQUEST_ENTER_LOBBY_FROM_ROOM.class);
 
     public _3005_xBBD_ROOM_REQUEST_ENTER_LOBBY_FROM_ROOM(DanceServer server) {
         super(server);
@@ -46,13 +49,9 @@ public class _3005_xBBD_ROOM_REQUEST_ENTER_LOBBY_FROM_ROOM extends HandlerBase {
 
         if (room != null) {
             room.leave(client);
-            getLogger().writeLog(LogType.CLIENT, "left room: '" + room.getName() + "'", client);
+            logger.info(String.format("left room '%s' (%s)", room.getName(), client));
         } else {
-            getLogger().writeLog(LogType.ERROR,
-                "_3005_xBBD_ROOM_REQUEST_ENTER_LOBBY_FROM_ROOM",
-                "handle",
-                "client is missing room while leaving room",
-                client);
+            logger.info(String.format("missing room while leaving room (%s)", client));
         }
 
         SendPacket answerPacket = new SendPacket(PacketType.ROOM_RESPONSE_ENTER_LOBBY_FROM_ROOM);

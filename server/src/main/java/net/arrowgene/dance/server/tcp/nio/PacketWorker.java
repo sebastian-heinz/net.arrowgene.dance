@@ -24,11 +24,10 @@
 
 package net.arrowgene.dance.server.tcp.nio;
 
-import net.arrowgene.dance.log.LogType;
-import net.arrowgene.dance.log.Logger;
-import net.arrowgene.dance.server.ServerLogger;
 import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -40,6 +39,8 @@ import java.util.LinkedList;
 
 public class PacketWorker implements Runnable {
 
+    private static final Logger logger = LogManager.getLogger(PacketWorker.class);
+
     private final Object workerLock = new Object();
     private final Object clientLock = new Object();
     private volatile boolean isRunning;
@@ -48,11 +49,9 @@ public class PacketWorker implements Runnable {
     private Thread workerThread;
     private HashMap<SocketChannel, TcpClientNIO> clients;
     private TcpServerNIO tcpServerNIO;
-    private ServerLogger logger;
 
-    public PacketWorker(TcpServerNIO tcpServerNIO, ServerLogger logger) {
+    public PacketWorker(TcpServerNIO tcpServerNIO) {
         this.tcpServerNIO = tcpServerNIO;
-        this.logger = logger;
         this.queue = new LinkedList<ServerDataEvent>();
         this.clients = new HashMap<SocketChannel, TcpClientNIO>();
     }
@@ -69,17 +68,17 @@ public class PacketWorker implements Runnable {
 
     public void writeDebugInfo() {
         synchronized (this.workerLock) {
-            this.logger.writeLog(LogType.DEBUG, "PacketWorker", "writeDebugInfo", "Queue Size: " + this.queue.size());
+            logger.debug(String.format("Queue Size: %d", queue.size()));
         }
         synchronized (this.clientLock) {
-            this.logger.writeLog(LogType.DEBUG, "PacketWorker", "writeDebugInfo", "Clients: " + this.clients.size());
+            logger.debug(String.format("Clients: %d", clients.size()));
         }
     }
 
     public void openedSocketChannel(SocketChannel socketChannel) {
         TcpClientNIO client;
         synchronized (this.clientLock) {
-            client = new TcpClientNIO(this.tcpServerNIO, socketChannel, this.logger);
+            client = new TcpClientNIO(this.tcpServerNIO, socketChannel);
             this.clients.put(socketChannel, client);
         }
         this.tcpServerNIO.clientConnected(client);
@@ -105,7 +104,7 @@ public class PacketWorker implements Runnable {
                 this.workerLock.notify();
             }
         } else {
-            this.logger.writeLog(LogType.ERROR, "PacketWorker", "processData", "Unknown Client");
+            logger.error("Unknown Client");
         }
     }
 
@@ -169,7 +168,8 @@ public class PacketWorker implements Runnable {
                         ReadPacket readPacket = new ReadPacket(packetType, packetBody);
                         packets.add(readPacket);
                     } else {
-                        this.logger.writeUnknownPacketLog(packetId, packetSize, packetBody, client);
+                        // TODO write packet log
+                        // this.logger.writeUnknownPacketLog(packetId, packetSize, packetBody, client);
                     }
                 } else {
                     read = false;

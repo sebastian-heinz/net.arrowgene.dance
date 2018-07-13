@@ -27,25 +27,24 @@ package net.arrowgene.dance.server.client;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountSettings;
 import net.arrowgene.dance.library.models.character.Character;
-import net.arrowgene.dance.library.models.character.SocialEntry;
-import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
-import net.arrowgene.dance.log.LogType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class ClientController extends ServerComponent {
 
+    private static final Logger logger = LogManager.getLogger(ClientController.class);
+
     private final Object clientsLock = new Object();
     private ArrayList<DanceClient> clients;
 
-
     public ClientController(DanceServer server) {
         super(server);
-        this.clients = new ArrayList<>();
+        clients = new ArrayList<>();
     }
 
     @Override
@@ -69,8 +68,8 @@ public class ClientController extends ServerComponent {
      */
     @Override
     public void stop() {
-        synchronized (this.clientsLock) {
-            for (DanceClient client : this.clients) {
+        synchronized (clientsLock) {
+            for (DanceClient client : clients) {
                 client.disconnect();
             }
         }
@@ -80,19 +79,18 @@ public class ClientController extends ServerComponent {
     public void clientAuthenticated(DanceClient client) {
         AccountSettings settings = super.getDatabase().getSettings(client.getAccount().getId());
         client.setSettings(settings);
-        synchronized (this.clientsLock) {
-            this.clients.add(client);
+        synchronized (clientsLock) {
+            clients.add(client);
         }
-        super.getLogger().writeLog(LogType.CLIENT, "Authenticated", client);
+        logger.info(String.format("Authenticated (%s)", client));
     }
 
     @Override
     public void clientDisconnected(DanceClient client) {
-        synchronized (this.clientsLock) {
-            this.clients.remove(client);
+        synchronized (clientsLock) {
+            clients.remove(client);
         }
-        super.getLogger().writeLog(LogType.CLIENT, "Disconnected", client);
-
+        logger.info(String.format("Disconnected (%s)", client));
         if (client.getRoom() != null) {
             client.getRoom().leave(client);
         }
@@ -107,13 +105,13 @@ public class ClientController extends ServerComponent {
 
     @Override
     public void clientConnected(DanceClient client) {
-        super.getLogger().writeLog(LogType.CLIENT, "Connected", client);
+        logger.info(String.format("Connected (%s)", client));
     }
 
     @Override
     public void writeDebugInfo() {
-        synchronized (this.clientsLock) {
-            getLogger().writeLog(LogType.DEBUG, "ClientController", "writeDebugInfo", "Clients: " + this.clients.size());
+        synchronized (clientsLock) {
+            logger.debug(String.format("Clients: %d", clients.size()));
         }
     }
 
@@ -122,7 +120,7 @@ public class ClientController extends ServerComponent {
      */
     public ArrayList<DanceClient> getClients() {
         ArrayList<DanceClient> clients;
-        synchronized (this.clientsLock) {
+        synchronized (clientsLock) {
             clients = new ArrayList<DanceClient>(this.clients);
         }
         return clients;
@@ -137,7 +135,7 @@ public class ClientController extends ServerComponent {
      */
     public DanceClient getClientByCharacterName(String characterName) {
         DanceClient result = null;
-        ArrayList<DanceClient> clients = this.getClients();
+        ArrayList<DanceClient> clients = getClients();
         for (DanceClient client : clients) {
             Character character = client.getCharacter();
             if (character != null && character.getName().equals(characterName)) {
@@ -157,7 +155,7 @@ public class ClientController extends ServerComponent {
      */
     public DanceClient getClientByCharacterId(int characterId) {
         DanceClient result = null;
-        ArrayList<DanceClient> clients = this.getClients();
+        ArrayList<DanceClient> clients = getClients();
         for (DanceClient client : clients) {
             Character character = client.getCharacter();
             if (character != null && character.getCharacterId() == characterId) {
@@ -170,7 +168,7 @@ public class ClientController extends ServerComponent {
 
     public DanceClient getClientByAccountId(int accountId) {
         DanceClient result = null;
-        ArrayList<DanceClient> clients = this.getClients();
+        ArrayList<DanceClient> clients = getClients();
         for (DanceClient client : clients) {
             if (client.getAccount().getId() == accountId) {
                 Character character = client.getCharacter();
@@ -192,7 +190,7 @@ public class ClientController extends ServerComponent {
      */
     public DanceClient getClientByAccountName(String accountName) {
         DanceClient result = null;
-        ArrayList<DanceClient> clients = this.getClients();
+        ArrayList<DanceClient> clients = getClients();
         for (DanceClient client : clients) {
             Account account = client.getAccount();
             if (account != null && account.getUsername().equals(accountName)) {
