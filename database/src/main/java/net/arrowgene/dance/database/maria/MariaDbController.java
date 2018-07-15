@@ -25,14 +25,17 @@ package net.arrowgene.dance.database.maria;
 
 
 import net.arrowgene.dance.database.Database;
+import net.arrowgene.dance.database.DatabaseSetting;
+import net.arrowgene.dance.database.ScriptRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MariaDbController {
@@ -64,7 +67,11 @@ public class MariaDbController {
             } else {
                 connection = DriverManager.getConnection(getConnectionString(host, port, database, user, password, timeout));
             }
-            prepareDatabase();
+            DatabaseSetting prepared = getSetting("prepared");
+            if (prepared == null || !prepared.getValue().equals("true")) {
+                prepareDatabase();
+                upsertSetting(new DatabaseSetting("prepared", "true"));
+            }
             success = true;
         } catch (Exception ex) {
             logger.error(ex);
@@ -124,6 +131,55 @@ public class MariaDbController {
         }
     }
 
+    public void upsertSetting(DatabaseSetting setting) {
+        PreparedStatement insert = createPreparedStatement("INSERT INTO `dance_database_setting` (`key`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), `value`=VALUES(`value`);");
+        try {
+            insert.clearParameters();
+            insert.setString(1, setting.getKey());
+            insert.setString(2, setting.getValue());
+            insert.execute();
+            insert.close();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+    }
+
+    public DatabaseSetting getSetting(String key) {
+        DatabaseSetting setting;
+        try {
+            PreparedStatement select = createPreparedStatement("SELECT `key`, `value` FROM `dance_database_setting` WHERE `key`=?;");
+            select.setString(1, key);
+            ResultSet rs = select.executeQuery();
+            if (rs.next()) {
+                setting = new DatabaseSetting();
+                setting.setKey(rs.getString("key"));
+                setting.setValue(rs.getString("value"));
+            } else {
+                setting = null;
+            }
+            rs.close();
+            select.close();
+        } catch (SQLException e) {
+            logger.error(e);
+            if (e.getErrorCode() == 1146) {
+                logger.error("^ If this is on first startup, don't worry the table will be created now.");
+            }
+            setting = null;
+        }
+        return setting;
+    }
+
+    public void deleteSetting(String key) {
+        PreparedStatement delete = createPreparedStatement("DELETE FROM `dance_database_setting` WHERE key=?;");
+        try {
+            delete.setString(1, key);
+            delete.execute();
+            delete.close();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+    }
+
     private Connection getConnection() {
         Connection connection;
         if (usePool) {
@@ -147,49 +203,22 @@ public class MariaDbController {
         return String.format("jdbc:mariadb://%s:%d/%s?user=%s&password=%s&connectTimeout=%d&pool&maxPoolSize=%d&disableMariaDbDriver", host, port, database, user, password, timeout, maxPoolSize);
     }
 
-
-// TODO replace import builder?
-
     private void prepareDatabase() {
-
-        logger.info("Preparing SQLiteDb with structure and default data");
-        importFile("mariadb_items.sql");
-        importFile("mariadb_songs.sql");
-        importFile("mariadb_default.sql");
-    }
-
-    private void importFile(String fileName) {
-        InputStream sqlStructureFile = Database.class.getResourceAsStream(fileName);
-        if (sqlStructureFile != null) {
-            logger.info(String.format("Importing %s into SQLiteDb", fileName));
-            StringBuilder sb = new StringBuilder();
-            try {
-                BufferedReader bfReader = new BufferedReader(new InputStreamReader(sqlStructureFile));
-                String sCurrentLine;
-                while ((sCurrentLine = bfReader.readLine()) != null) {
-                    sb.append(sCurrentLine).append("\n");
-                }
-                String[] strSQL = sb.toString().split(";");
-                for (String aStrSQL : strSQL) {
-                    if (!aStrSQL.trim().equals("")) {
-                        executeSQL(aStrSQL + ";");
-                    }
-                }
-            } catch (Exception ex) {
-                logger.error(ex);
-            }
-        } else {
-            logger.fatal(String.format("Could not find file %s", fileName));
-        }
-    }
-
-    private void executeSQL(String sql) {
-        Statement stmt = createStatement();
+        logger.info("Preparing Database");
+        List<String> scripts = new ArrayList<>();
+        scripts.add("mariadb_structure.sql");
+        scripts.add("mariadb_items.sql");
+        scripts.add("mariadb_songs.sql");
+        scripts.add("mariadb_default.sql");
+        ScriptRunner runner = new ScriptRunner(getConnection(), false, false);
         try {
-            stmt.execute(sql);
-            stmt.close();
-        } catch (Exception ex) {
-            logger.error(ex);
+            for (String script : scripts) {
+                logger.info(String.format("Executing Script: %s", script));
+                InputStream sqlStructureFile = Database.class.getResourceAsStream(script);
+                runner.runScript(new InputStreamReader(sqlStructureFile));
+            }
+        } catch (Exception e) {
+            logger.error(e);
         }
     }
 }

@@ -78,26 +78,6 @@ public class ServerConfig {
     private ClientManagerType clientManagerType;
 
     /**
-     * The port where the query server should listen on.
-     */
-    private int queryPort;
-
-    /**
-     * A key which the query server allows all requests from.
-     */
-    private String queryMasterKey;
-
-    /**
-     * Only accepts the query master key from this host.
-     */
-    private String queryMasterHost;
-
-    /**
-     * Defines how long a jwt is valid before the client needs to authenticate again.
-     */
-    private long queryJWTValidMS;
-
-    /**
      * If known Packets should be logged.
      */
     private boolean logPackets;
@@ -184,17 +164,11 @@ public class ServerConfig {
         databaseType = DatabaseType.MariaDB;
         mariaDbHost = "localhost";
         mariaDbPort = 3306;
-        mariaDbDatabase = "arrowgene_api";
+        mariaDbDatabase = "arrowgene";
         mariaDbUser = "root";
         mariaDbPassword = "";
         mariaDbTimeout = 0;
         mariaDbPool = false;
-
-        // Query Server
-        queryPort = 2346;
-        queryMasterHost = "localhost";
-        queryMasterKey = "TOPSECRET";
-        queryJWTValidMS = 2 * HOUR_MS;
 
         // Debug
         debugMode = true;
@@ -202,30 +176,6 @@ public class ServerConfig {
         debugDetectDeadlockMS = 60 * MIN_MS;
         debugGarbageCollectionMS = 30 * MIN_MS;
         debugProcessInfoMS = 10 * MIN_MS;
-    }
-
-    public String getQueryMasterKey() {
-        return queryMasterKey;
-    }
-
-    public void setQueryMasterKey(String queryMasterKey) {
-        this.queryMasterKey = queryMasterKey;
-    }
-
-    public String getQueryMasterHost() {
-        return queryMasterHost;
-    }
-
-    public void setQueryMasterHost(String queryMasterHost) {
-        this.queryMasterHost = queryMasterHost;
-    }
-
-    public long getQueryJWTValidMS() {
-        return queryJWTValidMS;
-    }
-
-    public void setQueryJWTValidMS(long queryJWTValidMS) {
-        this.queryJWTValidMS = queryJWTValidMS;
     }
 
     public String getLogDirectory() {
@@ -242,14 +192,6 @@ public class ServerConfig {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public int getQueryPort() {
-        return queryPort;
-    }
-
-    public void setQueryPort(int queryPort) {
-        this.queryPort = queryPort;
     }
 
     public int getLogPeriodMin() {
@@ -456,10 +398,6 @@ public class ServerConfig {
         currentConfig.add(String.format("worldSavePeriodMin: %s", worldSavePeriodMin));
         currentConfig.add(String.format("serverType: %s", serverType));
         currentConfig.add(String.format("clientManagerType: %s", clientManagerType));
-        currentConfig.add(String.format("queryPort: %s", queryPort));
-        // currentConfig.add(String.format("queryMasterKey %s", queryMasterKey));
-        currentConfig.add(String.format("queryMasterHost: %s", queryMasterHost));
-        currentConfig.add(String.format("queryJWTValidMS: %s", queryJWTValidMS));
         currentConfig.add(String.format("logPackets: %s", logPackets));
         currentConfig.add(String.format("maxAwaySeconds: %s", maxAwaySeconds));
         currentConfig.add(String.format("maxNetworkInactivitySeconds: %s", maxNetworkInactivitySeconds));

@@ -46,7 +46,6 @@ import java.util.List;
 
 public class MariaDb extends Database {
 
-
     private static final Logger logger = LogManager.getLogger(MariaDb.class);
 
     private MariaDbController controller;
