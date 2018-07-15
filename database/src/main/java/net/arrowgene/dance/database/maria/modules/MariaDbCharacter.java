@@ -57,21 +57,7 @@ public class MariaDbCharacter {
         return character;
     }
 
-    public List<Character> getCharactersByUserId(int userId) throws SQLException {
-        List<Character> characters = new ArrayList<>();
-        PreparedStatement select = controller.createPreparedStatement("SELECT * FROM `dance_character` WHERE `account_id`=?;");
-        select.setInt(1, userId);
-        ResultSet rs = select.executeQuery();
-        while (rs.next()) {
-            Character character = factory.createCharacter(rs);
-            characters.add(character);
-        }
-        rs.close();
-        select.close();
-        return characters;
-    }
-
-    public Character getCharacterById(int characterId) throws SQLException {
+    public Character getCharacter(int characterId) throws SQLException {
         Character character = null;
         PreparedStatement select = controller.createPreparedStatement("SELECT * FROM `dance_character` WHERE id=?;");
         select.setInt(1, characterId);

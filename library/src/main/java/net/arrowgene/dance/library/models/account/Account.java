@@ -31,11 +31,9 @@ public class Account {
     private String username;
     private String passwordHash;
     private AccountStateType state;
-    private int activeCharacterId;
 
     public Account() {
         this.id = -1;
-        this.activeCharacterId = -1;
     }
 
     public Account(String username, String passwordHash, AccountStateType state) {
@@ -43,7 +41,6 @@ public class Account {
         this.username = username;
         this.passwordHash = passwordHash;
         this.state = state;
-        this.activeCharacterId = -1;
     }
 
     public int getId() {
@@ -76,13 +73,5 @@ public class Account {
 
     public void setState(AccountStateType state) {
         this.state = state;
-    }
-
-    public int getActiveCharacterId() {
-        return activeCharacterId;
-    }
-
-    public void setActiveCharacterId(int activeCharacterId) {
-        this.activeCharacterId = activeCharacterId;
     }
 }

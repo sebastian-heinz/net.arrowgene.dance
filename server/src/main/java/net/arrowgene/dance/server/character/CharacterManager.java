@@ -73,7 +73,7 @@ public class CharacterManager extends ServerComponent {
 
     @Override
     public void clientAuthenticated(DanceClient client) {
-        Character character = this.getCharacterById(client.getAccount().getActiveCharacterId());
+        Character character = this.getCharacterById(client.getAccount().getId());
         if (character != null) {
             client.setCharacter(character);
             List<SocialEntry> buddies = super.getDatabase().getBuddies(client.getCharacter().getCharacterId());
@@ -124,7 +124,7 @@ public class CharacterManager extends ServerComponent {
         if (client != null && client.getCharacter() != null) {
             character = client.getCharacter();
         } else {
-            character = super.getDatabase().getCharacterById(characterId);
+            character = super.getDatabase().getCharacter(characterId);
         }
         return character;
     }

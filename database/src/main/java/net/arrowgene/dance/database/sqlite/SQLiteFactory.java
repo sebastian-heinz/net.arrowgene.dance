@@ -57,12 +57,6 @@ public class SQLiteFactory {
         account.setUsername(rs.getString("user_account"));
         account.setPasswordHash(rs.getString("user_password"));
         account.setState(AccountStateType.getType(rs.getInt("user_state")));
-        int activeCharacterId = rs.getInt("user_active_character_id");
-        if (rs.wasNull()) {
-            account.setActiveCharacterId(-1);
-        } else {
-            account.setActiveCharacterId(activeCharacterId);
-        }
         return account;
     }
 

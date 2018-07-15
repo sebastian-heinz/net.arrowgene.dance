@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS `dance_channel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `dance_character` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `account_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
   `name` varchar(45) NOT NULL,
   `level` int(11) NOT NULL,
   `sex` int(11) NOT NULL,
@@ -79,8 +78,7 @@ CREATE TABLE IF NOT EXISTS `dance_character` (
   `cloth_slot_count` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_dance_character_name` (`name`),
-  KEY `fk_dance_character_account_id` (`account_id`),
-  CONSTRAINT `fk_dance_character_account_id` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`)
+  CONSTRAINT `fk_dance_character_id` FOREIGN KEY (`id`) REFERENCES `account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `dance_favorite_song` (

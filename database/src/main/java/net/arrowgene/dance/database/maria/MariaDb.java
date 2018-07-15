@@ -86,31 +86,6 @@ public class MariaDb extends Database {
         wedding = new MariaDbWedding(controller, factory);
     }
 
-
-    @Override
-    public boolean insertAccount(Account account) {
-        boolean success = true;
-        try {
-            this.account.insertAccount(account);
-        } catch (SQLException e) {
-            logger.error(e);
-            success = false;
-        }
-        return success;
-    }
-
-    @Override
-    public boolean insertPassword(String accountName, String newPasswordHash) {
-        boolean success = true;
-        try {
-            this.account.insertPassword(accountName, newPasswordHash);
-        } catch (SQLException e) {
-            logger.error(e);
-            success = false;
-        }
-        return success;
-    }
-
     @Override
     public Account getAccount(String accountName) {
         Account account = null;
@@ -167,21 +142,10 @@ public class MariaDb extends Database {
     }
 
     @Override
-    public List<Character> getCharactersByUserId(int userId) {
-        List<Character> characters = null;
-        try {
-            characters = this.character.getCharactersByUserId(userId);
-        } catch (SQLException e) {
-            logger.error(e);
-        }
-        return characters;
-    }
-
-    @Override
-    public Character getCharacterById(int characterId) {
+    public Character getCharacter(int characterId) {
         Character character = null;
         try {
-            character = this.character.getCharacterById(characterId);
+            character = this.character.getCharacter(characterId);
         } catch (SQLException e) {
             logger.error(e);
         }

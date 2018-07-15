@@ -26,7 +26,6 @@ package net.arrowgene.dance.database;
 
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountSettings;
-import net.arrowgene.dance.library.models.account.AccountStateType;
 import net.arrowgene.dance.library.models.channel.ChannelDetails;
 import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.library.models.character.SocialEntry;
@@ -44,10 +43,6 @@ import java.util.List;
 
 public abstract class Database {
 
-    public abstract boolean insertAccount(Account account);
-
-    public abstract boolean insertPassword(String accountName, String newPasswordHash);
-
     public abstract Account getAccount(String accountName);
 
     public abstract Account getAccount(int accountId);
@@ -58,9 +53,7 @@ public abstract class Database {
 
     public abstract Character getCharacter(String characterName);
 
-    public abstract List<Character> getCharactersByUserId(int userId);
-
-    public abstract Character getCharacterById(int characterId);
+    public abstract Character getCharacter(int characterId);
 
     public abstract boolean insertCharacter(Character character);
 
@@ -298,29 +291,4 @@ public abstract class Database {
         this.insertWeddingRecords(weddingRecords);
         this.deleteWeddingRecords(deleteWeddingRecords);
     }
-
-    /**
-     * Creates a new account which will be stored inside the database.
-     *
-     * @param account      The account name.
-     * @param passwordHash The password hash.
-     * @return The newly created account.
-     */
-    public Account registerUser(String account, String passwordHash) {
-        Account newAccount = new Account(account, passwordHash, AccountStateType.MEMBER);
-        this.insertAccount(newAccount);
-        return newAccount;
-    }
-
-    /**
-     * Changes the password of an existing account.
-     *
-     * @param accountName     The name of the account where the password should be changed.
-     * @param newPasswordHash The new password hash for this account.
-     * @return {@code true} on success or {@code false} on failure to change the password hash.
-     */
-    public boolean changePassword(String accountName, String newPasswordHash) {
-        return this.insertPassword(accountName, newPasswordHash);
-    }
-
 }

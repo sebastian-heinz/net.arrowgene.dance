@@ -25,7 +25,6 @@
 package net.arrowgene.dance;
 
 import net.arrowgene.dance.gui.frmMain;
-import net.arrowgene.dance.query.QueryServer;
 import net.arrowgene.dance.server.DanceServer;
 
 
@@ -34,8 +33,6 @@ public class Starter {
         if (argv.length >= 1 && argv[0].equals("server")) {
             DanceServer server = new DanceServer();
             server.start();
-            QueryServer query = new QueryServer(server);
-            query.start();
         } else {
             new frmMain();
         }

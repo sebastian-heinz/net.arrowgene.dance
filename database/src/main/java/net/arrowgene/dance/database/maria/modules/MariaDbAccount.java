@@ -27,8 +27,6 @@ package net.arrowgene.dance.database.maria.modules;
 import net.arrowgene.dance.database.maria.MariaDbController;
 import net.arrowgene.dance.database.maria.MariaDbFactory;
 import net.arrowgene.dance.library.models.account.Account;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,22 +34,12 @@ import java.sql.SQLException;
 
 public class MariaDbAccount {
 
-    private static final Logger logger = LogManager.getLogger(MariaDbAccount.class);
-
     private MariaDbController controller;
     private MariaDbFactory factory;
 
     public MariaDbAccount(MariaDbController controller, MariaDbFactory factory) {
         this.controller = controller;
         this.factory = factory;
-    }
-
-    public void insertAccount(Account account) throws SQLException {
-        logger.warn("Account creation not supported for MariaDB");
-    }
-
-    public void insertPassword(String accountName, String newPasswordHash) throws SQLException {
-        logger.warn("Password change not supported for MariaDB");
     }
 
     public Account getAccount(String accountName) throws SQLException {

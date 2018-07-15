@@ -64,28 +64,7 @@ public class SQLiteCharacter {
 
     }
 
-    public List<Character> getCharactersByUserId(int userId) throws SQLException {
-        List<Character> characters = new ArrayList<Character>();
-
-        PreparedStatement select = this.controller
-            .createPreparedStatement("SELECT * FROM ag_character WHERE user_id=?;");
-
-        select.setInt(1, userId);
-
-        ResultSet rs = select.executeQuery();
-        while (rs.next()) {
-            Character character = this.factory.createCharacter(rs);
-            characters.add(character);
-        }
-
-        rs.close();
-        select.close();
-
-        return characters;
-    }
-
-
-    public Character getCharacterById(int characterId) throws SQLException {
+    public Character getCharacter(int characterId) throws SQLException {
         Character character = null;
 
         PreparedStatement select = this.controller

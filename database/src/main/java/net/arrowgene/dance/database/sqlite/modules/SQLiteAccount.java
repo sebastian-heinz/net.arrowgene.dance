@@ -44,52 +44,6 @@ public class SQLiteAccount {
         this.factory = factory;
     }
 
-    public void insertAccount(Account account) throws SQLException {
-
-        if (account.getId() > -1) {
-            PreparedStatement update = this.controller.createPreparedStatement(
-                "UPDATE ag_user SET user_account=?, user_password=?, user_state=?, user_active_character_id=? WHERE user_id=?;");
-            update.setString(1, account.getUsername());
-            update.setString(2, account.getPasswordHash());
-            update.setInt(3, account.getState().getNumValue());
-            if (account.getActiveCharacterId() >= 0) {
-                update.setInt(4, account.getActiveCharacterId());
-            } else {
-                update.setNull(4, Types.INTEGER);
-            }
-            update.setInt(5, account.getId());
-            update.execute();
-            update.close();
-        } else {
-            PreparedStatement insert = this.controller
-                .createPreparedStatement("INSERT INTO ag_user VALUES (?,?,?,?,?);");
-            insert.setString(2, account.getUsername());
-            insert.setString(3, account.getPasswordHash());
-            insert.setInt(4, account.getState().getNumValue());
-            if (account.getActiveCharacterId() >= 0) {
-                insert.setInt(5, account.getActiveCharacterId());
-            } else {
-                insert.setNull(5, Types.INTEGER);
-            }
-            insert.execute();
-
-            int id = this.controller.getAutoIncrement(insert);
-            account.setId(id);
-
-            insert.close();
-        }
-    }
-
-    public void insertPassword(String accountName, String newPasswordHash) throws SQLException {
-
-        PreparedStatement update = this.controller
-            .createPreparedStatement("UPDATE ag_user SET user_password=? WHERE user_account=?;");
-        update.setString(1, newPasswordHash);
-        update.setString(2, accountName);
-        update.execute();
-        update.close();
-    }
-
     public Account getAccount(String accountName) throws SQLException {
         Account account = null;
 
