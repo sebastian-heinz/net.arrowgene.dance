@@ -44,7 +44,7 @@ public class MariaDbAccount {
 
     public Account getAccount(String accountName) throws SQLException {
         Account account = null;
-        PreparedStatement select = controller.createPreparedStatement("SELECT `id`, `name`, `hash` FROM `account` WHERE `name`=?;");
+        PreparedStatement select = controller.createPreparedStatement("SELECT `id`, `name`, `hash`, `state` FROM `account` WHERE `name`=?;");
         select.setString(1, accountName);
         ResultSet rs = select.executeQuery();
         if (rs.next()) {
@@ -57,22 +57,8 @@ public class MariaDbAccount {
 
     public Account getAccount(int accountId) throws SQLException {
         Account account = null;
-        PreparedStatement select = controller.createPreparedStatement("SELECT `id`, `name`, `hash` FROM `account` WHERE `id`=?;");
+        PreparedStatement select = controller.createPreparedStatement("SELECT `id`, `name`, `hash`, `state` FROM `account` WHERE `id`=?;");
         select.setInt(1, accountId);
-        ResultSet rs = select.executeQuery();
-        if (rs.next()) {
-            account = factory.createAccount(rs);
-        }
-        rs.close();
-        select.close();
-        return account;
-    }
-
-    public Account getAccount(String accountName, String passwordHash) throws SQLException {
-        Account account = null;
-        PreparedStatement select = controller.createPreparedStatement("SELECT `id`, `name`, `hash` FROM `account` WHERE `name`=? AND `hash`=?;");
-        select.setString(1, accountName);
-        select.setString(2, passwordHash);
         ResultSet rs = select.executeQuery();
         if (rs.next()) {
             account = factory.createAccount(rs);

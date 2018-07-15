@@ -24,6 +24,7 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
+import net.arrowgene.dance.library.common.BCrypt;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.server.DanceServer;
@@ -75,68 +76,76 @@ public class _1000_x3E8_LOGIN_REQUEST_AUTHENTICATION extends HandlerBase {
                 }
             }
             if (!inTransit) {
-                Account account = getDatabase().getAccount(username, password);
+                Account account = getDatabase().getAccount(username);
                 if (account != null) {
-                    switch (account.getState()) {
-                        case MEMBER:
-                        case MODERATOR:
-                        case ADMIN:
-                            DanceClient possibleActive = super.server.getClientController().getClientByAccountName(account.getUsername());
-                            if (possibleActive == null) {
-                                client.setAccount(account);
-                                super.server.clientAuthenticated(client);
-                                Character character = client.getCharacter();
-                                if (character != null) {
-                                    logger.info(String.format("Logged In (%s)", client));
-                                    answerPacket.addInt32(LoginErrorType.MSG_NO_ERROR.getNumValue());
-                                    answerPacket.addInt16(versionMajorClient);
-                                    answerPacket.addInt16(versionMinorClient);
-                                    if (character.isNewCharacter()) {
-                                        answerPacket.addByte(0);
-                                        answerPacket.addByte(1);
+                    if (BCrypt.checkpw(password, account.getPasswordHash())) {
+                        switch (account.getState()) {
+                            case USER:
+                            case PREMIUM:
+                            case MODERATOR:
+                            case MANAGER:
+                            case ADMIN:
+                                DanceClient possibleActive = super.server.getClientController().getClientByAccountName(account.getUsername());
+                                if (possibleActive == null) {
+                                    client.setAccount(account);
+                                    super.server.clientAuthenticated(client);
+                                    Character character = client.getCharacter();
+                                    if (character != null) {
+                                        logger.info(String.format("Logged In (%s)", client));
+                                        answerPacket.addInt32(LoginErrorType.MSG_NO_ERROR.getNumValue());
+                                        answerPacket.addInt16(versionMajorClient);
+                                        answerPacket.addInt16(versionMinorClient);
+                                        if (character.isNewCharacter()) {
+                                            answerPacket.addByte(0);
+                                            answerPacket.addByte(1);
+                                            answerPacket.addByte(1);
+                                        } else {
+                                            // Unknown Byte (00 from packet logs)
+                                            answerPacket.addByte(0);
+                                            // Possible  "new character byte"
+                                            // Setting to 1 will trigger "LOGIN_REQUEST_CREATE_CHARACTER"
+                                            // and Settings menu will be opened
+                                            answerPacket.addByte(0);
+                                            // Unknown Byte (01 from packet logs)
+                                            answerPacket.addByte(1);
+                                        }
+                                        answerPacket.addStringNulTerminated(account.getUsername());
+                                        // Unknown Byte (Default 01)
                                         answerPacket.addByte(1);
                                     } else {
-                                        // Unknown Byte (00 from packet logs)
-                                        answerPacket.addByte(0);
-                                        // Possible  "new character byte"
-                                        // Setting to 1 will trigger "LOGIN_REQUEST_CREATE_CHARACTER"
-                                        // and Settings menu will be opened
-                                        answerPacket.addByte(0);
-                                        // Unknown Byte (01 from packet logs)
-                                        answerPacket.addByte(1);
-                                    }
-                                    answerPacket.addStringNulTerminated(account.getUsername());
-                                    // Unknown Byte (Default 01)
-                                    answerPacket.addByte(1);
-                                } else {
-                                    // Multiple Characters can be created with the web frontend.
-                                    // One of the Characters needs to be set as active.
+                                        // Multiple Characters can be created with the web frontend.
+                                        // One of the Characters needs to be set as active.
 
-                                    logger.warn(String.format("no character created or no character is set active in 'user_active_character_id' of 'ag_user' table (%s)", client));
-                                    // TODO No Character created / active: Find a better error message for dance client
-                                    answerPacket.addInt32(LoginErrorType.MSG_LOGIN_ERROR.getNumValue());
+                                        logger.warn(String.format("no character created or no character is set active in 'user_active_character_id' of 'ag_user' table (%s)", client));
+                                        // TODO No Character created / active: Find a better error message for dance client
+                                        answerPacket.addInt32(LoginErrorType.MSG_LOGIN_ERROR.getNumValue());
+                                        disconnectClient = true;
+                                    }
+                                } else {
+                                    logger.warn(String.format("tried to login while already online, disconnecting both (%s)", client));
+                                    //TODO Disconnect whoever is online? or not in case the person is in a active game?
+                                    possibleActive.disconnect();
+                                    answerPacket.addInt32(LoginErrorType.MSG_ALREADY_ONLINE.getNumValue());
                                     disconnectClient = true;
                                 }
-                            } else {
-                                logger.warn(String.format("tried to login while already online, disconnecting both (%s)", client));
-                                //TODO Disconnect whoever is online? or not in case the person is in a active game?
-                                possibleActive.disconnect();
-                                answerPacket.addInt32(LoginErrorType.MSG_ALREADY_ONLINE.getNumValue());
+                                break;
+                            case BANNED:
+                                answerPacket.addInt32(LoginErrorType.MSG_ACCOUNT_BANNED.getNumValue());
                                 disconnectClient = true;
-                            }
-                            break;
-                        case BANNED:
-                            answerPacket.addInt32(LoginErrorType.MSG_ACCOUNT_BANNED.getNumValue());
-                            disconnectClient = true;
-                            break;
-                        default:
-                            answerPacket.addInt32(LoginErrorType.MSG_LOGIN_ERROR.getNumValue());
-                            disconnectClient = true;
-                            break;
+                                break;
+                            default:
+                                answerPacket.addInt32(LoginErrorType.MSG_LOGIN_ERROR.getNumValue());
+                                disconnectClient = true;
+                                break;
+                        }
+                    } else {
+                        answerPacket.addInt32(LoginErrorType.MSG_WRONG_PASSWORD.getNumValue());
+                        logger.warn(String.format("Login with username '%s' failed, because the password was wrong (%s)", username, client));
+                        disconnectClient = true;
                     }
                 } else {
                     answerPacket.addInt32(LoginErrorType.MSG_WRONG_PASSWORD.getNumValue());
-                    logger.warn(String.format("Login with username '%s' failed, because no account was found for the credentials (%s)", username, client));
+                    logger.warn(String.format("Login with username '%s' failed, because no account was found (%s)", username, client));
                     disconnectClient = true;
                 }
                 freeRequest(username);

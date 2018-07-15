@@ -30,10 +30,11 @@ package net.arrowgene.dance.library.models.account;
  */
 public enum AccountStateType {
 
-    BANNED(10),
-    MEMBER(20),
-    MODERATOR(30),
-    QUERY(50),
+    BANNED(-1),
+    USER(1),
+    PREMIUM(25),
+    MODERATOR(50),
+    MANAGER(75),
     ADMIN(100);
 
     private int numValue;
@@ -52,6 +53,6 @@ public enum AccountStateType {
                 return pt;
             }
         }
-        return null;
+        return BANNED;
     }
 }

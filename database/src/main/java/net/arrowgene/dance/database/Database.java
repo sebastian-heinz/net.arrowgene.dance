@@ -47,8 +47,6 @@ public abstract class Database {
 
     public abstract Account getAccount(int accountId);
 
-    public abstract Account getAccount(String accountName, String passwordHash);
-
     public abstract List<ChannelDetails> getChannels();
 
     public abstract Character getCharacter(String characterName);

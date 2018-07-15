@@ -79,23 +79,4 @@ public class SQLiteAccount {
 
         return account;
     }
-
-    public Account getAccount(String accountName, String passwordHash) throws SQLException {
-        Account account = null;
-
-        PreparedStatement select = this.controller
-            .createPreparedStatement("SELECT * FROM ag_user WHERE user_account=? AND user_password=?");
-        select.setString(1, accountName);
-        select.setString(2, passwordHash);
-        ResultSet rs = select.executeQuery();
-        if (rs.next()) {
-            account = this.factory.createAccount(rs);
-        }
-
-        rs.close();
-        select.close();
-
-        return account;
-    }
-
 }

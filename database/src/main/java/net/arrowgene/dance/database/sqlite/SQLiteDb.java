@@ -109,17 +109,6 @@ public class SQLiteDb extends Database {
     }
 
     @Override
-    public Account getAccount(String accountName, String passwordHash) {
-        Account account = null;
-        try {
-            account = this.account.getAccount(accountName, passwordHash);
-        } catch (SQLException e) {
-            logger.error(e);
-        }
-        return account;
-    }
-
-    @Override
     public List<ChannelDetails> getChannels() {
         List<ChannelDetails> channels = null;
         try {
