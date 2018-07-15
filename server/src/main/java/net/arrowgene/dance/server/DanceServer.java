@@ -25,6 +25,7 @@
 package net.arrowgene.dance.server;
 
 import net.arrowgene.dance.database.Database;
+import net.arrowgene.dance.database.maria.MariaDb;
 import net.arrowgene.dance.database.sqlite.SQLiteDb;
 import net.arrowgene.dance.server.character.CharacterManager;
 import net.arrowgene.dance.server.chat.ChatManager;
@@ -276,12 +277,31 @@ public class DanceServer implements ConnectedListener, DisconnectedListener, Rec
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         Thread.setDefaultUncaughtExceptionHandler(this);
 
-        clientLookup = new HashMap<>();
-        database = new SQLiteDb();
-
         deadlockDetectThread = new DeadLockDetector(this);
         deadlockDetectThread.setDaemon(true);
         deadlockDetectThread.start();
+
+        clientLookup = new HashMap<>();
+
+        switch (serverConfig.getDatabaseType()) {
+            case SQLite:
+                database = new SQLiteDb();
+                break;
+            case MariaDB:
+                database = new MariaDb(
+                    serverConfig.getMariaDbHost(),
+                    serverConfig.getMariaDbPort(),
+                    serverConfig.getMariaDbDatabase(),
+                    serverConfig.getMariaDbUser(),
+                    serverConfig.getMariaDbPassword(),
+                    serverConfig.getMariaDbTimeout(),
+                    serverConfig.isMariaDbPool()
+                );
+                break;
+            default:
+                logger.fatal("Database Type not found, check settings for [DatabaseType] value");
+                break;
+        }
 
         switch (serverConfig.getServerType()) {
             case IO:

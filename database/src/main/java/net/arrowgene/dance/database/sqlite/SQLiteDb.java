@@ -5,7 +5,7 @@
  * Copyright (C) 2013-2018  Sebastian Heinz (github: sebastian-heinz)
  * Copyright (C) 2013-2018  Daniel Neuendorf
  *
- * Github: https://github.com/Arrowgene/net.arrowgene.dance
+ * Github: https://github.com/Arrowgene/Arrowgene.Ez2Off
  * Web: https://arrowgene.net
  *
  * net.arrowgene.dance is free software: you can redistribute it and/or modify

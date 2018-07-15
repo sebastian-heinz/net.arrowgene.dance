@@ -24,6 +24,7 @@
 
 package net.arrowgene.dance.server;
 
+import net.arrowgene.dance.database.DatabaseType;
 import net.arrowgene.dance.server.tcp.ServerType;
 import net.arrowgene.dance.server.tcp.io.ClientManagerType;
 
@@ -147,40 +148,60 @@ public class ServerConfig {
      */
     private int tpProducerSleepMS;
 
+    private DatabaseType databaseType;
+
+    private String mariaDbHost;
+    private short mariaDbPort;
+    private String mariaDbDatabase;
+    private String mariaDbUser;
+    private String mariaDbPassword;
+    private boolean mariaDbPool;
+    private int mariaDbTimeout;
+
     public ServerConfig() {
         File file = new File("./logs");
         file.mkdirs();
 
-        this.logDirectory = file.getAbsolutePath();
-        this.logPeriodMin = 30;
+        logDirectory = file.getAbsolutePath();
+        logPeriodMin = 30;
 
         // Game Server
-        this.hostAddress = null;
-        this.port = 2345;
-        this.worldSavePeriodMin = 60;
-        this.logPackets = true;
-        this.maxAwaySeconds = 30 * MIN_SEC;
-        this.serverType = ServerType.IO;
-        this.clientManagerType = ClientManagerType.ThreadPool;
+        hostAddress = null;
+        port = 2345;
+        worldSavePeriodMin = 60;
+        logPackets = true;
+        maxAwaySeconds = 30 * MIN_SEC;
+        serverType = ServerType.IO;
+        clientManagerType = ClientManagerType.ThreadPool;
 
         // Thread Pool Specific
-        this.maxNetworkInactivitySeconds = 2 * MIN_SEC;
-        this.tpConsumerCount = 5;
-        this.tpProducerCount = 2;
-        this.tpProducerSleepMS = 100;
+        maxNetworkInactivitySeconds = 2 * MIN_SEC;
+        tpConsumerCount = 5;
+        tpProducerCount = 2;
+        tpProducerSleepMS = 100;
+
+        // Database
+        databaseType = DatabaseType.MariaDB;
+        mariaDbHost = "localhost";
+        mariaDbPort = 3306;
+        mariaDbDatabase = "arrowgene_api";
+        mariaDbUser = "root";
+        mariaDbPassword = "";
+        mariaDbTimeout = 0;
+        mariaDbPool = false;
 
         // Query Server
-        this.queryPort = 2346;
-        this.queryMasterHost = "localhost";
-        this.queryMasterKey = "TOPSECRET";
-        this.queryJWTValidMS = 2 * HOUR_MS;
+        queryPort = 2346;
+        queryMasterHost = "localhost";
+        queryMasterKey = "TOPSECRET";
+        queryJWTValidMS = 2 * HOUR_MS;
 
         // Debug
-        this.debugMode = true;
-        this.debugWriteInfoMS = 10 * MIN_MS;
-        this.debugDetectDeadlockMS = 60 * MIN_MS;
-        this.debugGarbageCollectionMS = 30 * MIN_MS;
-        this.debugProcessInfoMS = 10 * MIN_MS;
+        debugMode = true;
+        debugWriteInfoMS = 10 * MIN_MS;
+        debugDetectDeadlockMS = 60 * MIN_MS;
+        debugGarbageCollectionMS = 30 * MIN_MS;
+        debugProcessInfoMS = 10 * MIN_MS;
     }
 
     public String getQueryMasterKey() {
@@ -248,7 +269,7 @@ public class ServerConfig {
     }
 
     public InetAddress getHostAddress() {
-        return this.hostAddress;
+        return hostAddress;
     }
 
     public void setHostAddress(InetAddress hostAddress) {
@@ -359,33 +380,98 @@ public class ServerConfig {
         this.tpProducerSleepMS = tpProducerSleepMS;
     }
 
+    public DatabaseType getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(DatabaseType databaseType) {
+        this.databaseType = databaseType;
+    }
+
+    public String getMariaDbHost() {
+        return mariaDbHost;
+    }
+
+    public void setMariaDbHost(String mariaDbHost) {
+        this.mariaDbHost = mariaDbHost;
+    }
+
+    public String getMariaDbUser() {
+        return mariaDbUser;
+    }
+
+    public void setMariaDbUser(String mariaDbUser) {
+        this.mariaDbUser = mariaDbUser;
+    }
+
+    public String getMariaDbPassword() {
+        return mariaDbPassword;
+    }
+
+    public void setMariaDbPassword(String mariaDbPassword) {
+        this.mariaDbPassword = mariaDbPassword;
+    }
+
+    public boolean isMariaDbPool() {
+        return mariaDbPool;
+    }
+
+    public void setMariaDbPool(boolean mariaDbPool) {
+        this.mariaDbPool = mariaDbPool;
+    }
+
+    public int getMariaDbTimeout() {
+        return mariaDbTimeout;
+    }
+
+    public void setMariaDbTimeout(int mariaDbTimeout) {
+        this.mariaDbTimeout = mariaDbTimeout;
+    }
+
+    public short getMariaDbPort() {
+        return mariaDbPort;
+    }
+
+    public void setMariaDbPort(short mariaDbPort) {
+        this.mariaDbPort = mariaDbPort;
+    }
+
+    public String getMariaDbDatabase() {
+        return mariaDbDatabase;
+    }
+
+    public void setMariaDbDatabase(String mariaDbDatabase) {
+        this.mariaDbDatabase = mariaDbDatabase;
+    }
+
     /**
      * Returns every current setting
      */
     public List<String> getCurrentConfiguration() {
         List<String> currentConfig = new ArrayList<>();
-        currentConfig.add(String.format("logDirectory: %s", this.logDirectory));
-        currentConfig.add(String.format("port: %s", this.port));
-        currentConfig.add(String.format("hostAddress: %s", this.hostAddress));
-        currentConfig.add(String.format("logPeriodMin: %s", this.logPeriodMin));
-        currentConfig.add(String.format("worldSavePeriodMin: %s", this.worldSavePeriodMin));
-        currentConfig.add(String.format("serverType: %s", this.serverType));
-        currentConfig.add(String.format("clientManagerType: %s", this.clientManagerType));
-        currentConfig.add(String.format("queryPort: %s", this.queryPort));
-        // currentConfig.add(String.format("queryMasterKey %s", this.queryMasterKey));
-        currentConfig.add(String.format("queryMasterHost: %s", this.queryMasterHost));
-        currentConfig.add(String.format("queryJWTValidMS: %s", this.queryJWTValidMS));
-        currentConfig.add(String.format("logPackets: %s", this.logPackets));
-        currentConfig.add(String.format("maxAwaySeconds: %s", this.maxAwaySeconds));
-        currentConfig.add(String.format("maxNetworkInactivitySeconds: %s", this.maxNetworkInactivitySeconds));
-        currentConfig.add(String.format("debugMode: %s", this.debugMode));
-        currentConfig.add(String.format("debugWriteInfoMS: %s", this.debugWriteInfoMS));
-        currentConfig.add(String.format("debugDetectDeadlockMS: %s", this.debugDetectDeadlockMS));
-        currentConfig.add(String.format("debugGarbageCollectionMS: %s", this.debugGarbageCollectionMS));
-        currentConfig.add(String.format("debugProcessInfoMS: %s", this.debugProcessInfoMS));
-        currentConfig.add(String.format("tpProducerSleepMS: %s", this.tpProducerSleepMS));
-        currentConfig.add(String.format("tpProducerCount: %s", this.tpProducerCount));
-        currentConfig.add(String.format("tpConsumerCount: %s", this.tpConsumerCount));
+        currentConfig.add(String.format("logDirectory: %s", logDirectory));
+        currentConfig.add(String.format("port: %s", port));
+        currentConfig.add(String.format("hostAddress: %s", hostAddress));
+        currentConfig.add(String.format("logPeriodMin: %s", logPeriodMin));
+        currentConfig.add(String.format("worldSavePeriodMin: %s", worldSavePeriodMin));
+        currentConfig.add(String.format("serverType: %s", serverType));
+        currentConfig.add(String.format("clientManagerType: %s", clientManagerType));
+        currentConfig.add(String.format("queryPort: %s", queryPort));
+        // currentConfig.add(String.format("queryMasterKey %s", queryMasterKey));
+        currentConfig.add(String.format("queryMasterHost: %s", queryMasterHost));
+        currentConfig.add(String.format("queryJWTValidMS: %s", queryJWTValidMS));
+        currentConfig.add(String.format("logPackets: %s", logPackets));
+        currentConfig.add(String.format("maxAwaySeconds: %s", maxAwaySeconds));
+        currentConfig.add(String.format("maxNetworkInactivitySeconds: %s", maxNetworkInactivitySeconds));
+        currentConfig.add(String.format("debugMode: %s", debugMode));
+        currentConfig.add(String.format("debugWriteInfoMS: %s", debugWriteInfoMS));
+        currentConfig.add(String.format("debugDetectDeadlockMS: %s", debugDetectDeadlockMS));
+        currentConfig.add(String.format("debugGarbageCollectionMS: %s", debugGarbageCollectionMS));
+        currentConfig.add(String.format("debugProcessInfoMS: %s", debugProcessInfoMS));
+        currentConfig.add(String.format("tpProducerSleepMS: %s", tpProducerSleepMS));
+        currentConfig.add(String.format("tpProducerCount: %s", tpProducerCount));
+        currentConfig.add(String.format("tpConsumerCount: %s", tpConsumerCount));
+        currentConfig.add(String.format("databaseType: %s", databaseType));
         return currentConfig;
     }
 }

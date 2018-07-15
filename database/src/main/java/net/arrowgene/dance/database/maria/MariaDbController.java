@@ -24,10 +24,14 @@
 package net.arrowgene.dance.database.maria;
 
 
+import net.arrowgene.dance.database.Database;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.*;
 
 
@@ -51,15 +55,16 @@ public class MariaDbController {
         }
     }
 
-    public boolean initialize(String host, short port, String user, String password, int timeout) {
+    public boolean initialize(String host, short port, String database, String user, String password, int timeout) {
         boolean success;
         try {
             Class.forName(JDBC_DRIVER);
             if (usePool) {
-                pool = new MariaDbPoolDataSource(getConnectionPoolString(host, port, user, password, timeout, 10));
+                pool = new MariaDbPoolDataSource(getConnectionPoolString(host, port, database, user, password, timeout, 10));
             } else {
-                connection = DriverManager.getConnection(getConnectionString(host, port, user, password, timeout));
+                connection = DriverManager.getConnection(getConnectionString(host, port, database, user, password, timeout));
             }
+            prepareDatabase();
             success = true;
         } catch (Exception ex) {
             logger.error(ex);
@@ -68,9 +73,18 @@ public class MariaDbController {
         return success;
     }
 
-    public PreparedStatement getPreparedStatement(String sql) {
+    public PreparedStatement createPreparedStatement(String sql) {
         try {
             return getConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        } catch (Exception ex) {
+            logger.error(ex);
+            return null;
+        }
+    }
+
+    public Statement createStatement() {
+        try {
+            return getConnection().createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         } catch (Exception ex) {
             logger.error(ex);
             return null;
@@ -125,12 +139,57 @@ public class MariaDbController {
         return connection;
     }
 
-    private String getConnectionString(String host, short port, String user, String password, int timeout) {
-        return String.format("jdbc:mariadb://%s:%d/DB?user=%s&password=%s&connectTimeout=%d&disableMariaDbDriver", host, port, user, password, timeout);
+    private String getConnectionString(String host, short port, String database, String user, String password, int timeout) {
+        return String.format("jdbc:mariadb://%s:%d/%s?user=%s&password=%s&connectTimeout=%d&disableMariaDbDriver", host, port, database, user, password, timeout);
     }
 
-    private String getConnectionPoolString(String host, short port, String user, String password, int timeout, int maxPoolSize) {
-        return String.format("jdbc:mariadb://%s:%d/DB?user=%s&password=%s&connectTimeout=%d&pool&maxPoolSize=%d&disableMariaDbDriver", host, port, user, password, timeout, maxPoolSize);
+    private String getConnectionPoolString(String host, short port, String database, String user, String password, int timeout, int maxPoolSize) {
+        return String.format("jdbc:mariadb://%s:%d/%s?user=%s&password=%s&connectTimeout=%d&pool&maxPoolSize=%d&disableMariaDbDriver", host, port, database, user, password, timeout, maxPoolSize);
     }
 
+
+// TODO replace import builder?
+
+    private void prepareDatabase() {
+
+        logger.info("Preparing SQLiteDb with structure and default data");
+        importFile("mariadb_items.sql");
+        importFile("mariadb_songs.sql");
+        importFile("mariadb_default.sql");
+    }
+
+    private void importFile(String fileName) {
+        InputStream sqlStructureFile = Database.class.getResourceAsStream(fileName);
+        if (sqlStructureFile != null) {
+            logger.info(String.format("Importing %s into SQLiteDb", fileName));
+            StringBuilder sb = new StringBuilder();
+            try {
+                BufferedReader bfReader = new BufferedReader(new InputStreamReader(sqlStructureFile));
+                String sCurrentLine;
+                while ((sCurrentLine = bfReader.readLine()) != null) {
+                    sb.append(sCurrentLine).append("\n");
+                }
+                String[] strSQL = sb.toString().split(";");
+                for (String aStrSQL : strSQL) {
+                    if (!aStrSQL.trim().equals("")) {
+                        executeSQL(aStrSQL + ";");
+                    }
+                }
+            } catch (Exception ex) {
+                logger.error(ex);
+            }
+        } else {
+            logger.fatal(String.format("Could not find file %s", fileName));
+        }
+    }
+
+    private void executeSQL(String sql) {
+        Statement stmt = createStatement();
+        try {
+            stmt.execute(sql);
+            stmt.close();
+        } catch (Exception ex) {
+            logger.error(ex);
+        }
+    }
 }

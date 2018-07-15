@@ -24,6 +24,7 @@
 package net.arrowgene.dance.database.maria;
 
 import net.arrowgene.dance.database.Database;
+import net.arrowgene.dance.database.maria.modules.*;
 import net.arrowgene.dance.library.models.account.Account;
 import net.arrowgene.dance.library.models.account.AccountSettings;
 import net.arrowgene.dance.library.models.channel.ChannelDetails;
@@ -40,322 +41,760 @@ import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class MariaDb extends Database {
 
 
     private static final Logger logger = LogManager.getLogger(MariaDb.class);
+
     private MariaDbController controller;
     private MariaDbFactory factory;
+    private MariaDbAccount account;
+    private MariaDbChannel channel;
+    private MariaDbCharacter character;
+    private MariaDbFavoriteSong favoriteSong;
+    private MariaDbGroup group;
+    private MariaDbGroupMember groupMember;
+    private MariaDbInventoryItem inventoryItem;
+    private MariaDbMail mail;
+    private MariaDbSettings settings;
+    private MariaDbShopItem shopItem;
+    private MariaDbSocial social;
+    private MariaDbSong song;
+    private MariaDbWedding wedding;
 
-
-    public MariaDb() {
-        super();
+    public MariaDb(String host, short port, String database, String user, String password, int timeout, boolean usePool) {
+        controller = new MariaDbController(usePool);
+        if (!controller.initialize(host, port, database, user, password, timeout)) {
+            logger.fatal("Could not initialize MariaDb");
+        }
+        factory = new MariaDbFactory();
+        account = new MariaDbAccount(controller, factory);
+        channel = new MariaDbChannel(controller, factory);
+        character = new MariaDbCharacter(controller, factory);
+        favoriteSong = new MariaDbFavoriteSong(controller, factory);
+        group = new MariaDbGroup(controller, factory);
+        groupMember = new MariaDbGroupMember(controller, factory);
+        inventoryItem = new MariaDbInventoryItem(controller, factory);
+        mail = new MariaDbMail(controller, factory);
+        settings = new MariaDbSettings(controller, factory);
+        shopItem = new MariaDbShopItem(controller, factory);
+        social = new MariaDbSocial(controller, factory);
+        song = new MariaDbSong(controller, factory);
+        wedding = new MariaDbWedding(controller, factory);
     }
+
 
     @Override
     public boolean insertAccount(Account account) {
-        return false;
+        boolean success = true;
+        try {
+            this.account.insertAccount(account);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertPassword(String accountName, String newPasswordHash) {
-        return false;
+        boolean success = true;
+        try {
+            this.account.insertPassword(accountName, newPasswordHash);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public Account getAccount(String accountName) {
-        return null;
+        Account account = null;
+        try {
+            account = this.account.getAccount(accountName);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return account;
     }
 
     @Override
     public Account getAccount(int accountId) {
-        return null;
+        Account account = null;
+        try {
+            account = this.account.getAccount(accountId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return account;
     }
 
     @Override
     public Account getAccount(String accountName, String passwordHash) {
-        return null;
+        Account account = null;
+        try {
+            account = this.account.getAccount(accountName, passwordHash);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return account;
     }
 
     @Override
     public List<ChannelDetails> getChannels() {
-        return null;
+        List<ChannelDetails> channels = null;
+        try {
+            channels = this.channel.getChannels();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return channels;
     }
 
     @Override
     public Character getCharacter(String characterName) {
-        return null;
+        Character character = null;
+        try {
+            character = this.character.getCharacter(characterName);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return character;
     }
 
     @Override
     public List<Character> getCharactersByUserId(int userId) {
-        return null;
+        List<Character> characters = null;
+        try {
+            characters = this.character.getCharactersByUserId(userId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return characters;
     }
 
     @Override
     public Character getCharacterById(int characterId) {
-        return null;
+        Character character = null;
+        try {
+            character = this.character.getCharacterById(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return character;
     }
 
     @Override
     public boolean insertCharacter(Character character) {
-        return false;
+        boolean success = true;
+        try {
+            this.character.insertCharacter(character);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertFavoriteSong(FavoriteSong favoriteSong) {
-        return false;
+        boolean success = true;
+        try {
+            this.favoriteSong.insertFavoriteSong(favoriteSong);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertFavoriteSongs(List<FavoriteSong> favoriteSongs) {
-        return false;
+        boolean success = true;
+        try {
+            this.favoriteSong.insertFavoriteSongs(favoriteSongs);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<FavoriteSong> getFavoriteSongs(int characterId) {
-        return null;
+        List<FavoriteSong> favoriteSongs = null;
+        try {
+            favoriteSongs = this.favoriteSong.getFavoriteSongs(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return favoriteSongs;
     }
 
     @Override
     public boolean deleteFavoriteSong(int favoriteSongId) {
-        return false;
+        boolean success = true;
+        try {
+            this.favoriteSong.deleteFavoriteSong(favoriteSongId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertGroups(List<Group> groups) {
-        return false;
-    }
-
-    @Override
-    public boolean insertGroup(Group group) {
-        return false;
+        boolean success = true;
+        try {
+            this.group.insertGroups(groups);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<Group> getGroups() {
-        return null;
+        List<Group> groups = null;
+        try {
+            groups = this.group.getGroups();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return groups;
+    }
+
+    @Override
+    public boolean insertGroup(Group group) {
+        boolean success = true;
+        try {
+            this.group.insertGroup(group);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteGroup(int groupId) {
-        return false;
+        boolean success = true;
+        try {
+            this.group.deleteGroup(groupId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteGroups(List<Group> groups) {
-        return false;
+        boolean success = true;
+        try {
+            this.group.deleteGroups(groups);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertGroupMember(GroupMember groupMember) {
-        return false;
+        boolean success = true;
+        try {
+            this.groupMember.insertGroupMember(groupMember);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertGroupMembers(List<GroupMember> groupMembers) {
-        return false;
+        boolean success = true;
+        try {
+            this.groupMember.insertGroupMembers(groupMembers);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<GroupMember> getGroupMembers(int groupId) {
-        return null;
+        List<GroupMember> groupMembers = null;
+        try {
+            groupMembers = this.groupMember.getGroupMembers(groupId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return groupMembers;
     }
 
     @Override
     public List<GroupMember> getGroupMembers() {
-        return null;
+        List<GroupMember> groupMembers = null;
+        try {
+            groupMembers = this.groupMember.getGroupMembers();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return groupMembers;
     }
 
     @Override
     public boolean deleteGroupMember(int characterId) {
-        return false;
+        boolean success = true;
+        try {
+            this.groupMember.deleteGroupMember(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteGroupMembers(List<GroupMember> groupMembers) {
-        return false;
+        boolean success = true;
+        try {
+            this.groupMember.deleteGroupMembers(groupMembers);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public InventoryItem getInventoryItem(int inventoryId) {
-        return null;
+        InventoryItem inventoryItem = null;
+        try {
+            inventoryItem = this.inventoryItem.getInventoryItem(inventoryId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return inventoryItem;
     }
 
     @Override
     public List<InventoryItem> getInventoryItems(int characterId) {
-        return null;
+        List<InventoryItem> inventoryItems = null;
+        try {
+            inventoryItems = this.inventoryItem.getInventoryItems(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return inventoryItems;
     }
 
     @Override
     public boolean insertInventoryItem(InventoryItem item) {
-        return false;
+        boolean success = true;
+        try {
+            this.inventoryItem.insertInventoryItem(item);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertInventoryItems(List<InventoryItem> items) {
-        return false;
+        boolean success = true;
+        try {
+            this.inventoryItem.insertInventoryItems(items);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteInventoryItem(int inventoryId) {
-        return false;
+        boolean success = true;
+        try {
+            this.inventoryItem.deleteInventoryItem(inventoryId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteInventoryItems(List<InventoryItem> items) {
-        return false;
+        boolean success = true;
+        try {
+            this.inventoryItem.deleteInventoryItems(items);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public Mail getMail(int mailId) {
-        return null;
+        Mail mail = null;
+        try {
+            mail = this.mail.getMail(mailId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return mail;
     }
 
     @Override
     public List<Mail> getMails(int characterId) {
-        return null;
+        List<Mail> mails = null;
+        try {
+            mails = this.mail.getMails(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return mails;
     }
 
     @Override
     public boolean insertMail(Mail mail) {
-        return false;
+        boolean success = true;
+        try {
+            this.mail.insertMail(mail);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertMails(List<Mail> mails) {
-        return false;
+        boolean success = true;
+        try {
+            this.mail.insertMails(mails);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteMail(int mailId) {
-        return false;
+        boolean success = true;
+        try {
+            this.mail.deleteMail(mailId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteMails(List<Mail> mails) {
-        return false;
+        boolean success = true;
+        try {
+            this.mail.deleteMails(mails);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertSettings(AccountSettings settings) {
-        return false;
+        boolean success = true;
+        try {
+            this.settings.insertSettings(settings);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public AccountSettings getSettings(int userId) {
-        return null;
+        AccountSettings settings = null;
+        try {
+            settings = this.settings.getSettings(userId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return settings;
     }
 
     @Override
     public boolean deleteSettings(int userId) {
-        return false;
+        boolean success = true;
+        try {
+            this.settings.deleteSettings(userId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertShopItem(ShopItem item) {
-        return false;
+        boolean success = true;
+        try {
+            this.shopItem.insertShopItem(item);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertShopItems(List<ShopItem> items) {
-        return false;
+        boolean success = true;
+        try {
+            this.shopItem.insertShopItems(items);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public ShopItem getShopItem(int itemId) {
-        return null;
+        ShopItem shopItem = null;
+        try {
+            shopItem = this.shopItem.getShopItem(itemId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return shopItem;
     }
 
     @Override
     public List<ShopItem> getShopItems() {
-        return null;
+        List<ShopItem> shopItems = null;
+        try {
+            shopItems = this.shopItem.getShopItems();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return shopItems;
     }
 
     @Override
     public boolean deleteShopItem(int itemId) {
-        return false;
+        boolean success = true;
+        try {
+            this.shopItem.deleteShopItem(itemId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertBuddy(SocialEntry buddy) {
-        return false;
+        boolean success = true;
+        try {
+            this.social.insertBuddy(buddy);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertBuddies(List<SocialEntry> buddies) {
-        return false;
+        boolean success = true;
+        try {
+            this.social.insertBuddies(buddies);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<SocialEntry> getBuddies(int characterId) {
-        return null;
+        List<SocialEntry> buddies = null;
+        try {
+            buddies = this.social.getBuddies(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return buddies;
     }
 
     @Override
     public boolean deleteBuddy(int buddyId) {
-        return false;
+        boolean success = true;
+        try {
+            this.social.deleteBuddy(buddyId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteBuddies(List<SocialEntry> buddies) {
-        return false;
+        boolean success = true;
+        try {
+            this.social.deleteBuddies(buddies);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertIgnore(SocialEntry ignored) {
-        return false;
+        boolean success = true;
+        try {
+            this.social.insertIgnore(ignored);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<SocialEntry> getIgnored(int characterId) {
-        return null;
+        List<SocialEntry> buddies = null;
+        try {
+            buddies = this.social.getIgnored(characterId);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return buddies;
     }
 
     @Override
     public boolean insertSong(Song song) {
-        return false;
+        boolean success = true;
+        try {
+            this.song.insertSong(song);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertSongs(List<Song> songs) {
-        return false;
+        boolean success = true;
+        try {
+            this.song.insertSongs(songs);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<Song> getSongs() {
-        return null;
+        List<Song> songs = null;
+        try {
+            songs = this.song.getSongs();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return songs;
     }
 
     @Override
     public boolean deleteSong(int songId) {
-        return false;
+        boolean success = true;
+        try {
+            this.song.deleteSong(songId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertWeddingRecord(WeddingRecord weddingRecord) {
-        return false;
+        boolean success = true;
+        try {
+            this.wedding.insertWeddingRecord(weddingRecord);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean insertWeddingRecords(List<WeddingRecord> weddingRecords) {
-        return false;
+        boolean success = true;
+        try {
+            this.wedding.insertWeddingRecords(weddingRecords);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public List<WeddingRecord> getWeddingRecords() {
-        return null;
+        List<WeddingRecord> weddingRecords = null;
+        try {
+            weddingRecords = this.wedding.getWeddingRecords();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return weddingRecords;
     }
 
     @Override
     public boolean deleteWeddingRecord(int weddingRecordId) {
-        return false;
+        boolean success = true;
+        try {
+            this.wedding.deleteWeddingRecord(weddingRecordId);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
 
     @Override
     public boolean deleteWeddingRecords(List<WeddingRecord> weddingRecords) {
-        return false;
+        boolean success = true;
+        try {
+            this.wedding.deleteWeddingRecords(weddingRecords);
+        } catch (SQLException e) {
+            logger.error(e);
+            success = false;
+        }
+        return success;
     }
+
 }
