@@ -31,8 +31,6 @@ import net.arrowgene.dance.library.models.character.Character;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MariaDbCharacter {
 
@@ -71,7 +69,7 @@ public class MariaDbCharacter {
     }
 
     public void insertCharacter(Character character) throws SQLException {
-        if (character.getCharacterId() > -1) {
+        if (character.getId() > -1) {
             PreparedStatement update = controller
                 .createPreparedStatement("UPDATE `dance_character` SET `name`=?, "
                     + "`level`=?, `sex`=?, `flag`=?, "
@@ -133,58 +131,57 @@ public class MariaDbCharacter {
             update.setString(40, character.getInfo());
             update.setInt(41, character.getItemSlotCount());
             update.setInt(42, character.getClothSlotCount());
-            update.setInt(43, character.getCharacterId());
+            update.setInt(43, character.getId());
             update.execute();
             update.close();
         } else {
             PreparedStatement insert = controller.createPreparedStatement(
-                "INSERT INTO `dance_character` VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
-            insert.setInt(2, character.getAccountId());
-            insert.setString(3, character.getName());
-            insert.setInt(4, character.getLevel());
-            insert.setInt(5, character.getSex().getNumValue());
-            insert.setInt(6, character.getFlag());
-            insert.setInt(7, character.getHair());
-            insert.setInt(8, character.getGlasses());
-            insert.setInt(9, character.getTop());
-            insert.setInt(10, character.getShoes());
-            insert.setInt(11, character.getFace());
-            insert.setInt(12, character.getGloves());
-            insert.setInt(13, character.getPants());
-            insert.setInt(14, character.getExperience());
-            insert.setInt(15, character.getGames());
-            insert.setInt(16, character.getWins());
-            insert.setInt(17, character.getDraws());
-            insert.setInt(18, character.getLosses());
-            insert.setInt(19, character.getHearts());
-            insert.setInt(20, character.getMvp());
-            insert.setInt(21, character.getPerfects());
-            insert.setInt(22, character.getCools());
-            insert.setInt(23, character.getBads());
-            insert.setInt(24, character.getMisses());
-            insert.setInt(25, character.getPoints());
-            insert.setInt(26, character.getCoins());
-            insert.setInt(27, character.getBonus());
-            insert.setInt(28, character.getWeight());
-            insert.setInt(29, character.getRanking());
-            insert.setInt(30, character.getStatusAchieved());
-            insert.setInt(31, character.getBestScore());
-            insert.setInt(32, character.getAge());
-            insert.setString(33, character.getZodiac());
-            insert.setString(34, character.getCity());
-            insert.setInt(35, character.getCalorinsLostWeek());
-            insert.setInt(36, character.getPointsWon());
-            insert.setInt(37, character.getCompetitionWon());
-            insert.setInt(38, character.getCompetitionLost());
-            insert.setInt(39, character.getMedal());
-            insert.setInt(40, character.getAllTimeBestRanking());
-            insert.setInt(41, character.getTutorial());
-            insert.setString(42, character.getInfo());
-            insert.setInt(43, character.getItemSlotCount());
-            insert.setInt(44, character.getClothSlotCount());
+                "INSERT INTO `dance_character` VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+            insert.setString(2, character.getName());
+            insert.setInt(3, character.getLevel());
+            insert.setInt(4, character.getSex().getNumValue());
+            insert.setInt(5, character.getFlag());
+            insert.setInt(6, character.getHair());
+            insert.setInt(7, character.getGlasses());
+            insert.setInt(8, character.getTop());
+            insert.setInt(9, character.getShoes());
+            insert.setInt(10, character.getFace());
+            insert.setInt(11, character.getGloves());
+            insert.setInt(12, character.getPants());
+            insert.setInt(13, character.getExperience());
+            insert.setInt(14, character.getGames());
+            insert.setInt(15, character.getWins());
+            insert.setInt(16, character.getDraws());
+            insert.setInt(17, character.getLosses());
+            insert.setInt(18, character.getHearts());
+            insert.setInt(19, character.getMvp());
+            insert.setInt(20, character.getPerfects());
+            insert.setInt(21, character.getCools());
+            insert.setInt(22, character.getBads());
+            insert.setInt(23, character.getMisses());
+            insert.setInt(24, character.getPoints());
+            insert.setInt(25, character.getCoins());
+            insert.setInt(26, character.getBonus());
+            insert.setInt(27, character.getWeight());
+            insert.setInt(28, character.getRanking());
+            insert.setInt(29, character.getStatusAchieved());
+            insert.setInt(30, character.getBestScore());
+            insert.setInt(31, character.getAge());
+            insert.setString(32, character.getZodiac());
+            insert.setString(33, character.getCity());
+            insert.setInt(34, character.getCalorinsLostWeek());
+            insert.setInt(35, character.getPointsWon());
+            insert.setInt(36, character.getCompetitionWon());
+            insert.setInt(37, character.getCompetitionLost());
+            insert.setInt(38, character.getMedal());
+            insert.setInt(39, character.getAllTimeBestRanking());
+            insert.setInt(40, character.getTutorial());
+            insert.setString(41, character.getInfo());
+            insert.setInt(42, character.getItemSlotCount());
+            insert.setInt(43, character.getClothSlotCount());
             insert.execute();
             int id = controller.getAutoIncrement(insert);
-            character.setCharacterId(id);
+            character.setId(id);
             insert.close();
         }
     }

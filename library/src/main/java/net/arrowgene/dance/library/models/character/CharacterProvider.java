@@ -41,9 +41,9 @@ public class CharacterProvider {
 
     }
 
-    public Character createPlayer(int accountId, String characterName, CharacterSexTyp sex) {
+    public Character createPlayer(int id, String characterName, CharacterSexTyp sex) {
         Character character = this.createBase();
-        character.setAccountId(accountId);
+        character.setId(id);
         character.setSex(sex);
         character.setName(characterName);
         return character;
@@ -51,8 +51,7 @@ public class CharacterProvider {
 
     private Character createBase() {
         Character character = new Character();
-        character.setAccountId(-1);
-        character.setCharacterId(-1);
+        character.setId(-1);
         character.setName("");
         character.setLevel(1);
         character.setSex(CharacterSexTyp.MALE);

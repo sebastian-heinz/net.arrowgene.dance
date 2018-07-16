@@ -138,7 +138,7 @@ public class Shop extends ServerComponent {
             return ShopMessages.MSG_ERROR_PLEASE_CHECK;
         }
 
-        InventoryItem invItem = this.craftItem(shopItem, client.getCharacter().getCharacterId());
+        InventoryItem invItem = this.craftItem(shopItem, client.getCharacter().getId());
         client.getInventory().addItem(invItem);
 
 

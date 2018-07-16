@@ -56,10 +56,10 @@ public class _6510_x196E_WEDDING_MAIL_CHANGE_RING extends HandlerBase {
         SendPacket answerPacket = new SendPacket(PacketType.WEDDING_RESPONSE_MAIL_CHANGE_RING);
         answerPacket.addByte(accepted); // TODO check??
         if (isAccepted) {
-            AcceptChangeRingMsg acceptChangeRingMessage = this.server.getLoveMagistrate().acceptChangeRing(client.getCharacter().getCharacterId());
+            AcceptChangeRingMsg acceptChangeRingMessage = this.server.getLoveMagistrate().acceptChangeRing(client.getCharacter().getId());
             answerPacket.addInt32(acceptChangeRingMessage.getNumValue());
         } else {
-            RejectChangeRingMsg rejectChangeRingMessage = this.server.getLoveMagistrate().rejectChangeRing(client.getCharacter().getCharacterId());
+            RejectChangeRingMsg rejectChangeRingMessage = this.server.getLoveMagistrate().rejectChangeRing(client.getCharacter().getId());
             answerPacket.addInt32(rejectChangeRingMessage.getNumValue());
         }
 

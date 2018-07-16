@@ -131,7 +131,7 @@ public class GroupManager extends ServerComponent {
     @Override
     public void clientAuthenticated(DanceClient client) {
         if (client.getCharacter() != null) {
-            GroupMember groupMember = this.getGroupMemberByCharacterId(client.getCharacter().getCharacterId());
+            GroupMember groupMember = this.getGroupMemberByCharacterId(client.getCharacter().getId());
             if (groupMember != null) {
                 Group group = this.server.getGroupManager().getGroupById(groupMember.getGroupId());
                 client.setGroupMember(groupMember);
@@ -309,7 +309,7 @@ public class GroupManager extends ServerComponent {
                 group.setCreationDate(DanceServer.getUnixTimeNow());
                 group.setIcon(icon);
                 group.setIntroduction(introduction);
-                group.setLeaderId(leader.getCharacterId());
+                group.setLeaderId(leader.getId());
                 group.setLeaderName(leader.getName());
                 group.setName(groupName);
                 group.setSlogan(slogan);
@@ -318,7 +318,7 @@ public class GroupManager extends ServerComponent {
 
                 if (success) {
                     this.addGroup(group);
-                    this.joinGroup(leader.getCharacterId(), group.getId(), GroupRights.LEADER);
+                    this.joinGroup(leader.getId(), group.getId(), GroupRights.LEADER);
                 } else {
                     group = null;
                 }

@@ -55,10 +55,10 @@ public class _6504_x1968_WEDDING_CANCEL_APPLICATION extends HandlerBase {
         answerPacket.addByte(decision.getNumValue());
 
         if (decision == WeddingDecisionType.DIVORCE) {
-            CancelDivorceMsg cancelDivorceMessage = this.server.getLoveMagistrate().cancelDivorce(client.getCharacter().getCharacterId());
+            CancelDivorceMsg cancelDivorceMessage = this.server.getLoveMagistrate().cancelDivorce(client.getCharacter().getId());
             answerPacket.addInt32(cancelDivorceMessage.getNumValue());
         } else if (decision == WeddingDecisionType.PROPOSE) {
-            CancelProposeMsg cancelProposeMessage = this.server.getLoveMagistrate().cancelPropose(client.getCharacter().getCharacterId());
+            CancelProposeMsg cancelProposeMessage = this.server.getLoveMagistrate().cancelPropose(client.getCharacter().getId());
             answerPacket.addInt32(cancelProposeMessage.getNumValue());
         }
 

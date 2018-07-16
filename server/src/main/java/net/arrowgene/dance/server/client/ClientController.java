@@ -158,7 +158,7 @@ public class ClientController extends ServerComponent {
         ArrayList<DanceClient> clients = getClients();
         for (DanceClient client : clients) {
             Character character = client.getCharacter();
-            if (character != null && character.getCharacterId() == characterId) {
+            if (character != null && character.getId() == characterId) {
                 result = client;
                 break;
             }

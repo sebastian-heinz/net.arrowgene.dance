@@ -67,7 +67,7 @@ public class _7510_x1D56_GROUP_REQUEST_JOIN extends HandlerBase {
             return GroupJoinResponse.GROUP_NOT_EXIST;
         }
 
-        super.server.getGroupManager().joinGroup(client.getCharacter().getCharacterId(), group.getId(), GroupRights.APPLICANT);
+        super.server.getGroupManager().joinGroup(client.getCharacter().getId(), group.getId(), GroupRights.APPLICANT);
 
         return GroupJoinResponse.OK;
     }

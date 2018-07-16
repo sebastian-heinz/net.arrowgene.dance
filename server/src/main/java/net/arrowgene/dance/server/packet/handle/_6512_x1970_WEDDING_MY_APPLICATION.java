@@ -24,7 +24,6 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import net.arrowgene.dance.library.models.wedding.WeddingState;
 import net.arrowgene.dance.server.client.DanceClient;
@@ -51,7 +50,7 @@ public class _6512_x1970_WEDDING_MY_APPLICATION extends HandlerBase {
 
         WeddingRecord record = client.getWeddingRecord();
         if (record != null) {
-            int characterId = client.getCharacter().getCharacterId();
+            int characterId = client.getCharacter().getId();
 
             WeddingState state = record.getWeddingState(characterId);
             String date = record.getDate(state);

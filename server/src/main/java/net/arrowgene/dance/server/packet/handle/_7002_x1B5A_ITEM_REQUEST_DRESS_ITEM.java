@@ -87,9 +87,9 @@ public class _7002_x1B5A_ITEM_REQUEST_DRESS_ITEM extends HandlerBase {
 
             RingType allowedRingType = client.getWeddingRecord().getRingType();
             int ringId = -1;
-            if (client.getWeddingRecord().getGroomId() == client.getCharacter().getCharacterId()) {
+            if (client.getWeddingRecord().getGroomId() == client.getCharacter().getId()) {
                 ringId = this.server.getLoveMagistrate().getMaleRingId(allowedRingType);
-            } else if (client.getWeddingRecord().getBrideId() == client.getCharacter().getCharacterId()) {
+            } else if (client.getWeddingRecord().getBrideId() == client.getCharacter().getId()) {
                 ringId = this.server.getLoveMagistrate().getFemaleRingId(allowedRingType);
             }
             if (ringId != inventoryItem.getShopItem().getId()) {

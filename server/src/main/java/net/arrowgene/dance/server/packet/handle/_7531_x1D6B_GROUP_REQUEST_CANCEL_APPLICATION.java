@@ -43,7 +43,7 @@ public class _7531_x1D6B_GROUP_REQUEST_CANCEL_APPLICATION extends HandlerBase {
         // TODO find out how to trigger this packet
         // If a user applied for a group, there is no button to cancel ...
 
-        super.server.getGroupManager().leaveGroup(client.getCharacter().getCharacterId());
+        super.server.getGroupManager().leaveGroup(client.getCharacter().getId());
 
         SendPacket answerPacket = new SendPacket(PacketType.GROUP_RESPONSE_CANCEL_APPLICATION);
         answerPacket.addInt32(GroupCancelApplicationMsg.OK.getNumValue());

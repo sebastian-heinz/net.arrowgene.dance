@@ -62,10 +62,10 @@ public class CharacterPacket {
         packet.addByte(character.getSex().getNumValue());
 
         if (weddingRecord != null) {
-            WeddingState myState = weddingRecord.getWeddingState(character.getCharacterId());
+            WeddingState myState = weddingRecord.getWeddingState(character.getId());
             packet.addByte(myState.getNumValue());
             if (myState == WeddingState.MARRIED || myState == WeddingState.DIVORCE) {
-                String partnerName = weddingRecord.getPartnerCharacterName(character.getCharacterId());
+                String partnerName = weddingRecord.getPartnerCharacterName(character.getId());
                 packet.addStringNulTerminated(partnerName);
             } else {
                 packet.addStringNulTerminated("");
@@ -177,9 +177,9 @@ public class CharacterPacket {
         packet.addByte(character.getSex().getNumValue());
 
         if (weddingRecord != null) {
-            WeddingState myState = weddingRecord.getWeddingState(character.getCharacterId());
+            WeddingState myState = weddingRecord.getWeddingState(character.getId());
             if (myState == WeddingState.MARRIED || myState == WeddingState.DIVORCE) {
-                String partnerName = weddingRecord.getPartnerCharacterName(character.getCharacterId());
+                String partnerName = weddingRecord.getPartnerCharacterName(character.getId());
                 packet.addStringNulTerminated(partnerName);
             } else {
                 packet.addStringNulTerminated("");

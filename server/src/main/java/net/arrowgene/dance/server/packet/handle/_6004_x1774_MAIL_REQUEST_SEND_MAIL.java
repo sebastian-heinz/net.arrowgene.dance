@@ -57,8 +57,8 @@ public class _6004_x1774_MAIL_REQUEST_SEND_MAIL extends HandlerBase {
             Mail mail = new Mail();
             mail.setBody(body);
             mail.setSubject(subject);
-            mail.setReceiverId(recipient.getCharacterId());
-            mail.setSenderId(client.getCharacter().getCharacterId());
+            mail.setReceiverId(recipient.getId());
+            mail.setSenderId(client.getCharacter().getId());
             mail.setSenderCharacterName(client.getCharacter().getName());
             super.server.getPostOffice().sendMail(mail);
 

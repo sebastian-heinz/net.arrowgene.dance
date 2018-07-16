@@ -24,9 +24,6 @@
 
 package net.arrowgene.dance.server.packet.handle;
 
-import java.lang.reflect.Member;
-
-import net.arrowgene.dance.library.models.character.Character;
 import net.arrowgene.dance.library.models.group.Group;
 import net.arrowgene.dance.library.models.group.GroupDismissMemberMsg;
 import net.arrowgene.dance.library.models.group.GroupMember;
@@ -67,7 +64,7 @@ public class _7512_x1D58_GROUP_REQUEST_DISMISS extends HandlerBase {
         }
 
         Group group = super.server.getGroupManager().getGroupById(groupMember.getGroupId());
-        if (client.getCharacter().getCharacterId() != group.getLeaderId()) {
+        if (client.getCharacter().getId() != group.getLeaderId()) {
             return GroupDismissMemberMsg.NO_RIGHTS;
         }
 

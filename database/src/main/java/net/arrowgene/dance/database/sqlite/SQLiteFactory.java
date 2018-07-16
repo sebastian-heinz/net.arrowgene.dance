@@ -145,8 +145,7 @@ public class SQLiteFactory {
 
     public Character createCharacter(ResultSet rs) throws SQLException {
         Character character = new Character();
-        character.setCharacterId(rs.getInt("character_id"));
-        character.setAccountId(rs.getInt("user_id"));
+        character.setId(rs.getInt("character_id"));
         character.setName(rs.getString("character_name"));
         character.setLevel(rs.getInt("character_level"));
         character.setSex(CharacterSexTyp.getType(rs.getInt("character_sex")));

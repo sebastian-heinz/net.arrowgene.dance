@@ -26,8 +26,6 @@ package net.arrowgene.dance.server.character;
 
 
 import net.arrowgene.dance.library.models.character.Character;
-import net.arrowgene.dance.library.models.character.CharacterProvider;
-import net.arrowgene.dance.library.models.character.CharacterSexTyp;
 import net.arrowgene.dance.library.models.character.SocialEntry;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
@@ -76,7 +74,7 @@ public class CharacterManager extends ServerComponent {
         Character character = this.getCharacterById(client.getAccount().getId());
         if (character != null) {
             client.setCharacter(character);
-            List<SocialEntry> buddies = super.getDatabase().getBuddies(client.getCharacter().getCharacterId());
+            List<SocialEntry> buddies = super.getDatabase().getBuddies(client.getCharacter().getId());
             client.setBuddyList(buddies);
         }
     }
@@ -85,7 +83,7 @@ public class CharacterManager extends ServerComponent {
     public void clientDisconnected(DanceClient client) {
         if (client.getCharacter() != null) {
             super.getDatabase().insertCharacter(client.getCharacter());
-            super.getDatabase().syncBuddies(client.getCharacter().getCharacterId(), client.getBuddyList());
+            super.getDatabase().syncBuddies(client.getCharacter().getId(), client.getBuddyList());
         }
     }
 
@@ -128,26 +126,5 @@ public class CharacterManager extends ServerComponent {
         }
         return character;
     }
-
-    public Character createNewCharacter(int accountId, String characterName, CharacterSexTyp sex) {
-        Character character = CharacterProvider.getInstance().createPlayer(accountId,
-            characterName,
-            sex
-        );
-        character.setNewCharacter(true);
-        super.getDatabase().insertCharacter(character);
-        return character;
-    }
-
-    public List<Character> getOnlineCharacters() {
-        List<Character> onlineCharacters = new ArrayList<>();
-        for (DanceClient client : super.server.getClientController().getClients()) {
-            if (client.getCharacter() != null) {
-                onlineCharacters.add(client.getCharacter());
-            }
-        }
-        return onlineCharacters;
-    }
-
 
 }

@@ -99,7 +99,7 @@ public class LoveMagistrate extends ServerComponent {
     @Override
     public void clientAuthenticated(DanceClient client) {
         if (client.getCharacter() != null) {
-            WeddingRecord weddingRecord = this.getWeddingRecordByCharacterId(client.getCharacter().getCharacterId());
+            WeddingRecord weddingRecord = this.getWeddingRecordByCharacterId(client.getCharacter().getId());
             client.setWeddingRecord(weddingRecord);
         }
     }
@@ -222,15 +222,15 @@ public class LoveMagistrate extends ServerComponent {
         }
         WeddingRecord existingRecord = client.getWeddingRecord();
         if (existingRecord != null) {
-            WeddingState myState = client.getWeddingRecord().getWeddingState(client.getCharacter().getCharacterId());
+            WeddingState myState = client.getWeddingRecord().getWeddingState(client.getCharacter().getId());
             if (myState == WeddingState.NOT_MARRIED) {
                 if (existingRecord.getDivorceDate() > 0) {
                     // An existing wedding record with a divorce date will disappear after 7 days.
                     // Until then you can not marry again
                     return ProposeMsg.YOU_CANNOT_MARRY_SO_SOON_AFTER_DIVORCE_WAIT_7_DAYS;
                 } else {
-                    int characterId = client.getCharacter().getCharacterId();
-                    int partnerCharacterId = partnerClient.getCharacter().getCharacterId();
+                    int characterId = client.getCharacter().getId();
+                    int partnerCharacterId = partnerClient.getCharacter().getId();
                     if (existingRecord.isMatchingRecord(characterId, partnerCharacterId)) {
                         // Two player proposed to each other, marry them.
                         existingRecord.setBrideState(WeddingState.MARRIED);
@@ -268,18 +268,18 @@ public class LoveMagistrate extends ServerComponent {
         if (client.getCharacter().getSex() == CharacterSexTyp.MALE) {
             ringId = this.getMaleRingId(ringType);
             partnerRingId = this.getFemaleRingId(ringType);
-            record.setGroomId(client.getCharacter().getCharacterId());
+            record.setGroomId(client.getCharacter().getId());
             record.setGroomCharacterName(client.getCharacter().getName());
-            record.setBrideId(partnerClient.getCharacter().getCharacterId());
+            record.setBrideId(partnerClient.getCharacter().getId());
             record.setBrideCharacterName(partnerClient.getCharacter().getName());
             record.setGroomState(WeddingState.ENGAGED);
             record.setBrideState(WeddingState.NOT_MARRIED);
         } else {
             ringId = this.getFemaleRingId(ringType);
             partnerRingId = this.getMaleRingId(ringType);
-            record.setBrideId(client.getCharacter().getCharacterId());
+            record.setBrideId(client.getCharacter().getId());
             record.setBrideCharacterName(client.getCharacter().getName());
-            record.setGroomId(partnerClient.getCharacter().getCharacterId());
+            record.setGroomId(partnerClient.getCharacter().getId());
             record.setGroomCharacterName(partnerClient.getCharacter().getName());
             record.setGroomState(WeddingState.NOT_MARRIED);
             record.setBrideState(WeddingState.ENGAGED);
@@ -301,8 +301,8 @@ public class LoveMagistrate extends ServerComponent {
         this.addWeddingRecord(record);
         client.setWeddingRecord(record);
         partnerClient.setWeddingRecord(record);
-        super.server.getPostOffice().sendMailPropose(client.getCharacter().getCharacterId(),
-            partnerClient.getCharacter().getCharacterId(), message, partnerRing.getShopItem().getId());
+        super.server.getPostOffice().sendMailPropose(client.getCharacter().getId(),
+            partnerClient.getCharacter().getId(), message, partnerRing.getShopItem().getId());
         return ProposeMsg.OK;
     }
 

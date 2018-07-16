@@ -43,7 +43,7 @@ public class MariaDbSettings {
     }
 
     public void insertSettings(AccountSettings settings) throws SQLException {
-        PreparedStatement insert = controller.createPreparedStatement("INSERT OR REPLACE INTO `dance_settings` VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+        PreparedStatement insert = controller.createPreparedStatement("INSERT OR REPLACE INTO `dance_setting` VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
         insert.setInt(1, settings.getAccId());
         insert.setInt(2, settings.getKeyArrowLeft());
         insert.setInt(3, settings.getKeyArrowUp());
@@ -64,7 +64,7 @@ public class MariaDbSettings {
 
     public AccountSettings getSettings(int userId) throws SQLException {
         AccountSettings settings = null;
-        PreparedStatement select = controller.createPreparedStatement("SELECT * FROM `dance_settings` WHERE `character_id`=?;");
+        PreparedStatement select = controller.createPreparedStatement("SELECT * FROM `dance_setting` WHERE `character_id`=?;");
         select.setInt(1, userId);
         ResultSet rs = select.executeQuery();
         if (rs.next()) {
@@ -76,7 +76,7 @@ public class MariaDbSettings {
     }
 
     public void deleteSettings(int userId) throws SQLException {
-        PreparedStatement delete = controller.createPreparedStatement("DELETE FROM `dance_settings` WHERE `character_id`=?;");
+        PreparedStatement delete = controller.createPreparedStatement("DELETE FROM `dance_setting` WHERE `character_id`=?;");
         delete.setInt(1, userId);
         delete.execute();
         delete.close();

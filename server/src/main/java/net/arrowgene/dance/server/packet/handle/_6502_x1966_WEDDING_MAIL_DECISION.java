@@ -55,7 +55,7 @@ public class _6502_x1966_WEDDING_MAIL_DECISION extends HandlerBase {
         WeddingDecisionType decision = WeddingDecisionType.getType(mailDecision);
         boolean isAccepted = accepted == 1;
 
-        int characterId = client.getCharacter().getCharacterId();
+        int characterId = client.getCharacter().getId();
 
         SendPacket answerPacket = new SendPacket(PacketType.WEDDING_RESPONSE_MAIL_DECISION);
         answerPacket.addByte(decision.getNumValue());

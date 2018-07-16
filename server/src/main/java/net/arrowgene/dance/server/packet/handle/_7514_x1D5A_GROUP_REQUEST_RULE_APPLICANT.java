@@ -54,7 +54,7 @@ public class _7514_x1D5A_GROUP_REQUEST_RULE_APPLICANT extends HandlerBase {
 
         if (group.getMembers().size() + count > group.getMaxMembers()) {
             answerPacket.addInt32(GroupRuleApplicantMsg.GROUP_IS_MAXIMUM_SIZE_BUY_EXPANSION_CARD.getNumValue());
-        } else if (client.getCharacter().getCharacterId() == group.getLeaderId()) {
+        } else if (client.getCharacter().getId() == group.getLeaderId()) {
             for (int i = 0; i < count; i++) {
                 String characterName = packet.getStringNulTerminated();
                 GroupMember member = super.server.getGroupManager().getGroupMemberByCharacterName(characterName);

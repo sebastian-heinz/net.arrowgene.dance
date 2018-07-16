@@ -69,7 +69,7 @@ public class CharacterMod implements ChatCommand {
                     Character newBride = server.getCharacterManager().getCharacterByName(command[2]);
                     if (newBride != null) {
                         danceClient.getWeddingRecord().setBrideCharacterName(newBride.getName());
-                        danceClient.getWeddingRecord().setBrideId(newBride.getCharacterId());
+                        danceClient.getWeddingRecord().setBrideId(newBride.getId());
                     } else {
                         response[0] = "New Bride don't exist";
                         error = true;
@@ -83,7 +83,7 @@ public class CharacterMod implements ChatCommand {
                     Character newGroom = server.getCharacterManager().getCharacterByName(command[2]);
                     if (newGroom != null) {
                         danceClient.getWeddingRecord().setGroomCharacterName(newGroom.getName());
-                        danceClient.getWeddingRecord().setGroomId(newGroom.getCharacterId());
+                        danceClient.getWeddingRecord().setGroomId(newGroom.getId());
                     } else {
                         response[0] = "New Groom don't exist";
                         error = true;

@@ -51,7 +51,7 @@ public class _7533_x1D6D_GROUP_REQUEST_REWRITE_BOARD extends HandlerBase {
         GroupFamilyNoticeRewriteMsg response = GroupFamilyNoticeRewriteMsg.TEXT_TOO_LONG;
         if (title.length() < MAX_TITLE_LENGTH && text.length() < MAX_TEXT_LENGTH) {
             Group group = client.getGroup();
-            if (client.getCharacter().getCharacterId() == group.getLeaderId()) {
+            if (client.getCharacter().getId() == group.getLeaderId()) {
                 group.setNoticeBoardTitle(title);
                 group.setNoticeBoardText(text);
                 group.setNoticeDate(DanceServer.getUnixTimeNow());

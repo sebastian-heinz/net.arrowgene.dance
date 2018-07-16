@@ -57,7 +57,7 @@ public class MariaDbMail {
             "dance_mail.type, " +
             "dance_mail.read, " +
             "dance_mail.special_sender, " +
-            "sender.character_name AS sender_character_name " +
+            "sender.name AS sender_character_name " +
             "FROM dance_mail " +
             "INNER JOIN dance_character AS sender ON dance_mail.sender_id = sender.id " +
             "WHERE id=?;");
@@ -84,7 +84,7 @@ public class MariaDbMail {
             "dance_mail.type, " +
             "dance_mail.read, " +
             "dance_mail.special_sender, " +
-            "sender.character_name AS sender_character_name " +
+            "sender.name AS sender_character_name " +
             "FROM dance_mail " +
             "INNER JOIN dance_character AS sender ON dance_mail.sender_id = sender.id " +
             "WHERE receiver_id=?;");

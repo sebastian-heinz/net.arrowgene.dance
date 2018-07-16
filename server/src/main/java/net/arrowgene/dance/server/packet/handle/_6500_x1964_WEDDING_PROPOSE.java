@@ -63,7 +63,7 @@ public class _6500_x1964_WEDDING_PROPOSE extends HandlerBase {
             ProposeMsg response = this.server.getLoveMagistrate().propose(client, partnerName, message, ringType);
             answerPacket.addInt32(response.getNumValue());
         } else if (decision == WeddingDecisionType.DIVORCE){
-            DivorceMsg divorceMessage = this.server.getLoveMagistrate().divorce(client.getCharacter().getCharacterId(), message);
+            DivorceMsg divorceMessage = this.server.getLoveMagistrate().divorce(client.getCharacter().getId(), message);
             answerPacket.addInt32(divorceMessage.getNumValue());
         }
 

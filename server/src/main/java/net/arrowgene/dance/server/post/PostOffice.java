@@ -64,7 +64,7 @@ public class PostOffice extends ServerComponent {
     @Override
     public void clientAuthenticated(DanceClient client) {
         if (client.getCharacter() != null) {
-            Mailbox mailbox = this.getMailboxByCharacterId(client.getCharacter().getCharacterId());
+            Mailbox mailbox = this.getMailboxByCharacterId(client.getCharacter().getId());
             client.setMailbox(mailbox);
         }
     }
@@ -72,7 +72,7 @@ public class PostOffice extends ServerComponent {
     @Override
     public void clientDisconnected(DanceClient client) {
         if (client.getCharacter() != null) {
-            super.getDatabase().syncMails(client.getCharacter().getCharacterId(), client.getMailbox().getMails());
+            super.getDatabase().syncMails(client.getCharacter().getId(), client.getMailbox().getMails());
         }
     }
 
@@ -99,8 +99,8 @@ public class PostOffice extends ServerComponent {
         Mail mail = new Mail();
         mail.setBody(body);
         mail.setSubject(subject);
-        mail.setReceiverId(recipient.getCharacterId());
-        mail.setSenderId(sender.getCharacterId());
+        mail.setReceiverId(recipient.getId());
+        mail.setSenderId(sender.getId());
         mail.setSenderCharacterName(sender.getName());
 
         if (giftItemId >= 0) {
@@ -120,8 +120,8 @@ public class PostOffice extends ServerComponent {
         Mail mail = new Mail();
         mail.setBody(body);
         mail.setSubject(sender.getName());
-        mail.setReceiverId(recipient.getCharacterId());
-        mail.setSenderId(sender.getCharacterId());
+        mail.setReceiverId(recipient.getId());
+        mail.setSenderId(sender.getId());
         mail.setType(MailType.PROPOSE_REQUEST);
         mail.setSpecialSender(SpecialSenderType.LOVE_MAGISTRATE);
         mail.setGiftItemId(giftItemId);
@@ -136,8 +136,8 @@ public class PostOffice extends ServerComponent {
         Mail mail = new Mail();
         mail.setBody(body);
         mail.setSubject(sender.getName());
-        mail.setReceiverId(recipient.getCharacterId());
-        mail.setSenderId(sender.getCharacterId());
+        mail.setReceiverId(recipient.getId());
+        mail.setSenderId(sender.getId());
         mail.setType(MailType.DIVORCE_REQUEST);
         mail.setSpecialSender(SpecialSenderType.LOVE_MAGISTRATE);
         this.sendMail(mail);
@@ -151,8 +151,8 @@ public class PostOffice extends ServerComponent {
         Mail mail = new Mail();
         mail.setBody("Your propose to " + sender.getName() + " expired");
         mail.setSubject("Propose Notice");
-        mail.setReceiverId(recipient.getCharacterId());
-        mail.setSenderId(sender.getCharacterId());
+        mail.setReceiverId(recipient.getId());
+        mail.setSenderId(sender.getId());
         mail.setSenderCharacterName(sender.getName());
         mail.setSpecialSender(SpecialSenderType.LOVE_MAGISTRATE);
         this.sendMail(mail);
@@ -160,8 +160,8 @@ public class PostOffice extends ServerComponent {
         Mail mail1 = new Mail();
         mail1.setBody("The propose from " + recipient.getName() + " expired because you tried to propose again or to someone else. Please check 'My Application' for current status if you are unsure.");
         mail1.setSubject("Propose Notice");
-        mail1.setReceiverId(sender.getCharacterId());
-        mail1.setSenderId(recipient.getCharacterId());
+        mail1.setReceiverId(sender.getId());
+        mail1.setSenderId(recipient.getId());
         mail1.setSpecialSender(SpecialSenderType.LOVE_MAGISTRATE);
         mail1.setSenderCharacterName(recipient.getName());
         this.sendMail(mail1);

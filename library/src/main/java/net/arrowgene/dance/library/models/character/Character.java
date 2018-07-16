@@ -30,8 +30,7 @@ public class Character {
     public static final int DEFAULT_CLOTH_ID = 0x7FFFFFFF;
 
     private boolean newCharacter;
-    private int accountId;
-    private int characterId;
+    private int id;
     private int level;
     private int flag;
     private int hair;
@@ -118,20 +117,12 @@ public class Character {
         this.moving = moving;
     }
 
-    public int getAccountId() {
-        return accountId;
+    public int getId() {
+        return id;
     }
 
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
-
-    public int getCharacterId() {
-        return characterId;
-    }
-
-    public void setCharacterId(int characterId) {
-        this.characterId = characterId;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getLevel() {

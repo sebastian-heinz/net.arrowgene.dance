@@ -25,11 +25,9 @@
 package net.arrowgene.dance.server.packet.handle;
 
 import net.arrowgene.dance.library.models.song.FavoriteSong;
-import net.arrowgene.dance.library.models.song.Song;
 import net.arrowgene.dance.server.client.DanceClient;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.packet.Packet;
-import net.arrowgene.dance.server.packet.PacketType;
 import net.arrowgene.dance.server.packet.ReadPacket;
 import net.arrowgene.dance.server.packet.SendPacket;
 import net.arrowgene.dance.server.packet.builder.SongPacket;
@@ -53,7 +51,7 @@ public class _3015_xBC7_ROOM_REQUEST_ADD_FAVORITE_SONG extends HandlerBase {
         packet.getByte();
 
         FavoriteSong favoriteSong = new FavoriteSong();
-        favoriteSong.setCharacterId(client.getCharacter().getCharacterId());
+        favoriteSong.setCharacterId(client.getCharacter().getId());
         favoriteSong.setSongId(songId);
 
         client.addFavoriteSong(favoriteSong);

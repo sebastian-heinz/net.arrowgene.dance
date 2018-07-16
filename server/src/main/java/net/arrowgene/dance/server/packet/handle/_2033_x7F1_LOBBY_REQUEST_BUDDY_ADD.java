@@ -61,8 +61,8 @@ public class _2033_x7F1_LOBBY_REQUEST_BUDDY_ADD extends HandlerBase {
 
             if (character != null) {
                 SocialEntry buddy = new SocialEntry();
-                buddy.setCharacterId(client.getCharacter().getCharacterId());
-                buddy.setSocialId(character.getCharacterId());
+                buddy.setCharacterId(client.getCharacter().getId());
+                buddy.setSocialId(character.getId());
                 buddy.setSocialName(buddyCharName);
 
                 client.addBuddy(buddy);

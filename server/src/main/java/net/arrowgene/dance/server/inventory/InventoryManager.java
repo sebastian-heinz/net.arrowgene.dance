@@ -73,7 +73,7 @@ public class InventoryManager extends ServerComponent {
     @Override
     public void clientAuthenticated(DanceClient client) {
         if (client.getCharacter() != null) {
-            Inventory inventory = this.getInventoryByCharacterId(client.getCharacter().getCharacterId());
+            Inventory inventory = this.getInventoryByCharacterId(client.getCharacter().getId());
             client.setInventory(inventory);
             client.loadEquippedItems();
         }
@@ -82,7 +82,7 @@ public class InventoryManager extends ServerComponent {
     @Override
     public void clientDisconnected(DanceClient client) {
         if (client.getCharacter() != null) {
-            super.getDatabase().syncInventory(client.getCharacter().getCharacterId(), client.getInventory().getItems());
+            super.getDatabase().syncInventory(client.getCharacter().getId(), client.getInventory().getItems());
         }
     }
 

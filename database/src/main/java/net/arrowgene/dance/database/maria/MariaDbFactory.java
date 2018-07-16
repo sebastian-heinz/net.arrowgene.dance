@@ -44,8 +44,6 @@ import net.arrowgene.dance.library.models.song.SongNote;
 import net.arrowgene.dance.library.models.wedding.RingType;
 import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import net.arrowgene.dance.library.models.wedding.WeddingState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -146,8 +144,7 @@ public class MariaDbFactory {
 
     public Character createCharacter(ResultSet rs) throws SQLException {
         Character character = new Character();
-        character.setCharacterId(rs.getInt("id"));
-        character.setAccountId(rs.getInt("user_id"));
+        character.setId(rs.getInt("id"));
         character.setName(rs.getString("name"));
         character.setLevel(rs.getInt("level"));
         character.setSex(CharacterSexTyp.getType(rs.getInt("sex")));

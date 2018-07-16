@@ -51,7 +51,7 @@ public class _6510_x196A_WEDDING_CHANGE_RING extends HandlerBase {
 
         RingType ringType = RingType.getType(ring);
 
-        ChangeRingMsg changeRingMessage = this.server.getLoveMagistrate().changeRing(client.getCharacter().getCharacterId(), message, ringType);
+        ChangeRingMsg changeRingMessage = this.server.getLoveMagistrate().changeRing(client.getCharacter().getId(), message, ringType);
 
         SendPacket answerPacket = new SendPacket(PacketType.WEDDING_RESPONSE_CHANGE_RING);
         answerPacket.addInt32(changeRingMessage.getNumValue());

@@ -63,7 +63,7 @@ public class _7506_x1D52_GROUP_REQUEST_LEAVE extends HandlerBase {
             return GroupQuitMsg.OK;
         }
 
-        if (character.getCharacterId() == group.getLeaderId()) {
+        if (character.getId() == group.getLeaderId()) {
             Inventory inventory = client.getInventory();
             if (inventory.getItemByShopItemId(GroupManager.ITEM_DISBAND_GROUP_CARD_ID) == null) {
                 return GroupQuitMsg.DISMISS_CARD;
@@ -71,7 +71,7 @@ public class _7506_x1D52_GROUP_REQUEST_LEAVE extends HandlerBase {
             // TODO remove 1* group Disband Card from Inventory.
         }
 
-        super.server.getGroupManager().leaveGroup(character.getCharacterId());
+        super.server.getGroupManager().leaveGroup(character.getId());
         return GroupQuitMsg.OK;
     }
 
