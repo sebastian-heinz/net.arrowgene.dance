@@ -18,7 +18,6 @@ gradle.ext.dance_vendor = "Arrowgene Team"
 
 
 include 'server'
-include 'bot'
 include 'library'
 include 'editor'
 include 'database'
