@@ -85,7 +85,7 @@ public class TPerClientManager extends ClientManager {
             }
             TPerClientTask clientTask = new TPerClientTask(super.tcpServerIO, tcpClientIO);
             Thread thread = new Thread(clientTask);
-            thread.setName("Client Thread:" + tcpClientIO.getIdentity());
+            thread.setName(String.format("Client Thread: %s", tcpClientIO));
             thread.start();
         }
     }

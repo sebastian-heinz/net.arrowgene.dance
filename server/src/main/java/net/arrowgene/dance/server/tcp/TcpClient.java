@@ -42,5 +42,6 @@ public abstract class TcpClient {
 
     public abstract void sendPacket(byte[] data);
 
-    public abstract String getIdentity();
+    @Override
+    public abstract String toString();
 }

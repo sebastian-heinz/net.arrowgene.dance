@@ -102,7 +102,7 @@ public class TPoolClientManager extends ClientManager {
     }
 
     public void disconnect(TPoolClient client) {
-        logger.info(String.format("Disconnecting (%s)", client.getIdentity()));
+        logger.info(String.format("Disconnecting (%s)", client));
         client.setAlive(false);
         this.tcpServerIO.clientDisconnected(client);
         try {

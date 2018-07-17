@@ -61,12 +61,9 @@ public class TcpClientIO extends TcpClient {
     }
 
     @Override
-    public String getIdentity() {
+    public String toString() {
         SocketAddress address = this.socket.getRemoteSocketAddress();
-        String identity = Converter.getAddressString(address);
-        if (identity == null) {
-            identity = "Unknown";
-        }
-        return identity;
+        String ip = Converter.getAddressString(address);
+        return String.format("[Ip:%s]", ip);
     }
 }

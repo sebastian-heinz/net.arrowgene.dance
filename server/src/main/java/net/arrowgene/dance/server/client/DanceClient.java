@@ -81,17 +81,7 @@ public class DanceClient {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Client: ");
-        if (getCharacter() != null) {
-            sb.append(getCharacter() + " ");
-        }
-        if (getRoom() != null) {
-            sb.append("Room: " + getRoom().getNumber() + "-" + getRoom().getName() + " ");
-        }
-
-        return sb.toString();
+        return String.format("[Character:%s][Channel:%s][Room:%s][Client:%s]", character, channel, room, tcpClient);
     }
 
     public TcpClient getTcpClient() {

@@ -100,15 +100,6 @@ public class Character {
         this.sex = CharacterSexTyp.MALE;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Char: " + getName());
-
-        return sb.toString();
-    }
-
     public int getMoving() {
         return moving;
     }
@@ -604,4 +595,10 @@ public class Character {
     public void setNewCharacter(boolean newCharacter) {
         this.newCharacter = newCharacter;
     }
+
+    @Override
+    public String toString() {
+        return String.format("[Id:%d][Name:%s]", id, name);
+    }
+
 }

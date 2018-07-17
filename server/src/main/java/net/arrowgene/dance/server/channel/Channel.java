@@ -246,4 +246,10 @@ public class Channel {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format("[Name:%s]", details.getName());
+    }
+
 }

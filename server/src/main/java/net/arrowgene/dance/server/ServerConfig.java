@@ -28,7 +28,6 @@ import net.arrowgene.dance.database.DatabaseType;
 import net.arrowgene.dance.server.tcp.ServerType;
 import net.arrowgene.dance.server.tcp.io.ClientManagerType;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +41,6 @@ public class ServerConfig {
     public static final int MIN_SEC = 60;
 
     /**
-     * Directory to store database, logs etc.
-     */
-    private String logDirectory;
-
-    /**
      * Port the listens for game connections.
      */
     private int port;
@@ -55,11 +49,6 @@ public class ServerConfig {
      * Host address of the server.
      */
     private InetAddress hostAddress;
-
-    /**
-     * Interval at which the server should save the logs to files.
-     */
-    private int logPeriodMin;
 
     /**
      * Interval at which the server should save the state to the database.
@@ -139,11 +128,6 @@ public class ServerConfig {
     private int mariaDbTimeout;
 
     public ServerConfig() {
-        File file = new File("./logs");
-        file.mkdirs();
-
-        logDirectory = file.getAbsolutePath();
-        logPeriodMin = 30;
 
         // Game Server
         hostAddress = null;
@@ -161,7 +145,7 @@ public class ServerConfig {
         tpProducerSleepMS = 100;
 
         // Database
-        databaseType = DatabaseType.MariaDB;
+        databaseType = DatabaseType.SQLite;
         mariaDbHost = "localhost";
         mariaDbPort = 3306;
         mariaDbDatabase = "arrowgene";
@@ -178,28 +162,12 @@ public class ServerConfig {
         debugProcessInfoMS = 10 * MIN_MS;
     }
 
-    public String getLogDirectory() {
-        return logDirectory;
-    }
-
-    public void setLogDirectory(String logDirectory) {
-        this.logDirectory = logDirectory;
-    }
-
     public int getPort() {
         return port;
     }
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public int getLogPeriodMin() {
-        return logPeriodMin;
-    }
-
-    public void setLogPeriodMin(int logPeriodMin) {
-        this.logPeriodMin = logPeriodMin;
     }
 
     public int getWorldSavePeriodMin() {
@@ -391,10 +359,8 @@ public class ServerConfig {
      */
     public List<String> getCurrentConfiguration() {
         List<String> currentConfig = new ArrayList<>();
-        currentConfig.add(String.format("logDirectory: %s", logDirectory));
         currentConfig.add(String.format("port: %s", port));
         currentConfig.add(String.format("hostAddress: %s", hostAddress));
-        currentConfig.add(String.format("logPeriodMin: %s", logPeriodMin));
         currentConfig.add(String.format("worldSavePeriodMin: %s", worldSavePeriodMin));
         currentConfig.add(String.format("serverType: %s", serverType));
         currentConfig.add(String.format("clientManagerType: %s", clientManagerType));

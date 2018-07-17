@@ -669,6 +669,11 @@ public class Room {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format("[Number:%d][Name:%s]", number, name);
+    }
+
     /**
      * Assigns a client to the next free slot and returns the number.
      *

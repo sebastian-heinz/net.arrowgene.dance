@@ -9,14 +9,12 @@ The Dance Server aims to emulate the behaviour of the original DANCE! ONLINE gam
 - [Scripts](#scripts)
 - [Structure](#structure)
   - [./src](#src)
-  - [./bot](#bot)
   - [./database](#database)
   - [./editor](#editor)
     - [./editor/itemlist](#editoritemlist)
     - [./editor/songcrypto](#editorsongcrypto)
     - [./editor/stepfile](#editorstepfile)
   - [./library](#library)
-  - [./log](#log)
   - [./server](#server)
     - [./server/channel](#serverchannel)
     - [./server/chat](#serverchat)
@@ -33,7 +31,6 @@ The Dance Server aims to emulate the behaviour of the original DANCE! ONLINE gam
     - [./server/tcp](#servertcp)
     - [./server/wedding](#serverwedding)
 - [Best Practise](#best-practise)
-- [Further Thoughts / Bigger Goals](#further-thoughts-bigger-goals)
 - [Developer Environment](#developer-environment)
 - [Links](#links)
 
@@ -123,16 +120,6 @@ Only the graphical components who depend on the server-project are included.
 All other user interfaces can be found in the editor-project.
 Adding new graphical components is easy by extending the 'EditorFrame'-class, this provides all information on how a window is displayed.
 
-## [/bot](./bot/src/main/java/net/arrowgene/dance/bot)
-Automated client to interact with the game-world via server.
-
-TODO:
-- Interact with server by using existing protocol (as client)
-- Extended Bot, knows the server instance, overrides methods to be spawned as a thread by server
-- join Rooms, play games, be fair :)
-- ability to spawn bot for playing by players (think lover-mode is missing a player)
-
-
 ## [/database](./database/src/main/java/net/arrowgene/dance/database)  
 Backend to store persistent data.
 
@@ -177,14 +164,6 @@ Function:
 - Database Models
 - Classes for client file reading/altering/writing
 - Utility Classes
-
-## [/log](./log/src/main/java/net/arrowgene/dance/log)  
-Handles log messages.
-
-Function:
-- Different Log Levels
-- Scheduled writing to file
-- Printing to console
 
 ## [/server](./server/src/main/java/net/arrowgene/dance/server)
 Accepts clients and handles requests.
@@ -269,7 +248,10 @@ Lets two people marry, displaying their characters in each others profile.
 
 Dependencies
 ===
-- org.xerial:sqlite-jdbc:3.20.1
+- org.apache.logging.log4j:log4j-core:2.11.0
+- org.apache.logging.log4j:log4j-api:2.11.0
+- org.xerial:sqlite-jdbc:3.21.0.1
+- org.mariadb.jdbc:mariadb-java-client:2.2.5
 
 Best Practise
 ===
@@ -278,25 +260,6 @@ Best Practise
 - Reduce Inheritance: Don't target the Interface (ie: declare varables as List<> instead of ArrayList<>) until necessary
 - Reduce Database Access: Manage high read/write access in memory, write back when crashing/closing (Except critical transactions, money, etc.)
 - Annotate functions with Javadoc (http://blog.joda.org/2012/11/javadoc-coding-standards.html)
-
-Further Thoughts / Bigger Goals
-===
-
-## File Source- / Storage- / Management-System
-Duplicated information is stored in more than one place. For example the properties of items are stored in a file (iteminfo.dat) and inside the database. 
-It need to be ensured that those files are always synchronised. 
-Therefor a source needs to be set on which can be relied that it contains the latest up to date state of the information. 
-A system need to be put in place that can produce all necessary files based on the source.
-
-1. Define a source ("master"-source) that holds the latest version of the information / where information are stored and updated
-2. Build a system that can produce all files from the "master"-source
-3. Version these files, so clients can always be sure to be synchronised with the servers "master"-source
-4. If the "master"-source is updated, the server needs to be shut down, a version needs to be bumped, and when clients connect they need to update in order to be synchron with the "master"-source again
-
-## Inspector:
-- A new project called "inspector"
-- Operates as a proxy and lists all incoming / outgoing packets
-- Provide inspection of the packets (display all known and unknwon properties with name and value)
 
 Developer Environment
 ===
