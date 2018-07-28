@@ -387,12 +387,13 @@ public class ServerConfig {
 
     private void readEnvironment() {
         String envDbType = System.getenv("DB_TYPE");
-        logger.info("EnvDB:" + envDbType);
         switch (envDbType) {
             case "maria":
                 databaseType = DatabaseType.MariaDB;
+                break;
             case "sqlite":
                 databaseType = DatabaseType.SQLite;
+                break;
         }
 
         String envDbUser = System.getenv("DB_USER");
