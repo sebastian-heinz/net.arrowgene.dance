@@ -1,11 +1,3 @@
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
 CREATE TABLE IF NOT EXISTS `database_setting` (
   `key` varchar(255) NOT NULL,
   `value` varchar(255) NOT NULL,
@@ -13,20 +5,21 @@ CREATE TABLE IF NOT EXISTS `database_setting` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `account` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(17) NOT NULL,
-  `hash` varchar(255) NOT NULL,
-  `mail` varchar(255) NOT NULL,
-  `mail_verified` tinyint(1) NOT NULL,
-  `mail_verified_at` datetime DEFAULT NULL,
-  `mail_token` varchar(255) DEFAULT NULL,
-  `password_token` varchar(255) DEFAULT NULL,
-  `state` int(11) NOT NULL,
-  `last_login` datetime DEFAULT NULL,
+  `id` INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(17) NOT NULL,
+  `normal_name` VARCHAR(17) NOT NULL,
+  `hash` VARCHAR(255) NOT NULL,
+  `mail` VARCHAR(255) NOT NULL,
+  `mail_verified` BOOLEAN NOT NULL,
+  `mail_verified_at` datetime,
+  `mail_token` VARCHAR(255),
+  `password_token` VARCHAR(255),
+  `state` INTEGER NOT NULL,
+  `last_login` datetime,
   `created` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_account_name` (`name`),
-  UNIQUE KEY `uq_account_mail` (`mail`)
+  CONSTRAINT `uq_account_name` UNIQUE (`name`),
+  CONSTRAINT `uq_account_normal_name` UNIQUE (`normal_name`),
+  CONSTRAINT `uq_account_mail` UNIQUE (`mail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `dance_channel` (
@@ -87,17 +80,6 @@ CREATE TABLE IF NOT EXISTS `dance_character` (
   CONSTRAINT `fk_dance_character_id` FOREIGN KEY (`id`) REFERENCES `account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `dance_favorite_song` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `song_id` int(11) NOT NULL,
-  `character_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_dance_favorite_song_song_id_character_id` (`song_id`,`character_id`),
-  KEY `fk_dance_favorite_song_character_id` (`character_id`),
-  CONSTRAINT `fk_dance_favorite_song_character_id` FOREIGN KEY (`character_id`) REFERENCES `dance_character` (`id`),
-  CONSTRAINT `fk_dance_favorite_song_song_id` FOREIGN KEY (`song_id`) REFERENCES `dance_song` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `dance_friend` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `my_character_id` int(11) NOT NULL,
@@ -151,21 +133,6 @@ CREATE TABLE IF NOT EXISTS `dance_ignore` (
   CONSTRAINT `fk_dance_ignore_my_character_id` FOREIGN KEY (`my_character_id`) REFERENCES `dance_character` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `dance_inventory` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `character_id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `slot_number` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `expire_date` int(11) NOT NULL,
-  `is_equipped` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_dance_inventory_character_id` (`character_id`),
-  KEY `fk_dance_inventory_item_id` (`item_id`),
-  CONSTRAINT `fk_dance_inventory_character_id` FOREIGN KEY (`character_id`) REFERENCES `dance_character` (`id`),
-  CONSTRAINT `fk_dance_inventory_item_id` FOREIGN KEY (`item_id`) REFERENCES `dance_item` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `dance_item` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -179,6 +146,21 @@ CREATE TABLE IF NOT EXISTS `dance_item` (
   `price_category` int(11) NOT NULL,
   `wedding_ring` int(11) NOT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `dance_inventory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `character_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `slot_number` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `expire_date` int(11) NOT NULL,
+  `is_equipped` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_dance_inventory_character_id` (`character_id`),
+  KEY `fk_dance_inventory_item_id` (`item_id`),
+  CONSTRAINT `fk_dance_inventory_character_id` FOREIGN KEY (`character_id`) REFERENCES `dance_character` (`id`),
+  CONSTRAINT `fk_dance_inventory_item_id` FOREIGN KEY (`item_id`) REFERENCES `dance_item` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `dance_mail` (
@@ -232,6 +214,18 @@ CREATE TABLE IF NOT EXISTS `dance_song` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `dance_favorite_song` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `song_id` int(11) NOT NULL,
+  `character_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_dance_favorite_song_song_id_character_id` (`song_id`,`character_id`),
+  KEY `fk_dance_favorite_song_song_id` (`song_id`),
+  KEY `fk_dance_favorite_song_character_id` (`character_id`),
+  CONSTRAINT `fk_dance_favorite_song_song_id` FOREIGN KEY (`song_id`) REFERENCES `dance_song` (`id`),
+  CONSTRAINT `fk_dance_favorite_song_character_id` FOREIGN KEY (`character_id`) REFERENCES `dance_character` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `dance_wedding` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `groom_id` int(11) NOT NULL,
@@ -248,10 +242,3 @@ CREATE TABLE IF NOT EXISTS `dance_wedding` (
   CONSTRAINT `fk_dance_wedding_bride_id` FOREIGN KEY (`bride_id`) REFERENCES `dance_character` (`id`),
   CONSTRAINT `fk_dance_wedding_groom_id` FOREIGN KEY (`groom_id`) REFERENCES `dance_character` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
