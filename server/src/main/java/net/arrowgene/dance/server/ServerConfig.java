@@ -160,6 +160,8 @@ public class ServerConfig {
         debugDetectDeadlockMS = 60 * MIN_MS;
         debugGarbageCollectionMS = 30 * MIN_MS;
         debugProcessInfoMS = 10 * MIN_MS;
+
+        readEnvironment();
     }
 
     public int getPort() {
@@ -377,5 +379,25 @@ public class ServerConfig {
         currentConfig.add(String.format("tpConsumerCount: %s", tpConsumerCount));
         currentConfig.add(String.format("databaseType: %s", databaseType));
         return currentConfig;
+    }
+
+    private void readEnvironment() {
+        String envDbType = System.getenv("DB_TYPE");
+        switch (envDbType) {
+            case "maria":
+                databaseType = DatabaseType.MariaDB;
+            case "sqlite":
+                databaseType = DatabaseType.SQLite;
+        }
+
+        String envDbUser = System.getenv("DB_USER");
+        if (envDbUser != null && !envDbUser.isEmpty()) {
+            mariaDbUser = envDbUser;
+        }
+
+        String envDbPass = System.getenv("DB_PASS");
+        if (envDbPass != null && !envDbPass.isEmpty()) {
+            mariaDbPassword = envDbPass;
+        }
     }
 }
