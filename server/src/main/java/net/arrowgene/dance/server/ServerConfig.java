@@ -27,13 +27,17 @@ package net.arrowgene.dance.server;
 import net.arrowgene.dance.database.DatabaseType;
 import net.arrowgene.dance.server.tcp.ServerType;
 import net.arrowgene.dance.server.tcp.io.ClientManagerType;
+import org.apache.logging.log4j.LogManager;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class ServerConfig {
+
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(ServerConfig.class);
 
     public static final String EOL = System.lineSeparator();
     public static final int HOUR_MS = 3600 * 1000;
@@ -383,6 +387,7 @@ public class ServerConfig {
 
     private void readEnvironment() {
         String envDbType = System.getenv("DB_TYPE");
+        logger.info("EnvDB:" + envDbType);
         switch (envDbType) {
             case "maria":
                 databaseType = DatabaseType.MariaDB;
