@@ -67,10 +67,10 @@ public class MariaDbController {
             } else {
                 connection = DriverManager.getConnection(getConnectionString(host, port, database, user, password, timeout));
             }
-            DatabaseSetting prepared = getSetting("prepared");
+            DatabaseSetting prepared = getSetting("dance_prepared");
             if (prepared == null || !prepared.getValue().equals("true")) {
                 prepareDatabase();
-                upsertSetting(new DatabaseSetting("prepared", "true"));
+                upsertSetting(new DatabaseSetting("dance_prepared", "true"));
             }
             success = true;
         } catch (Exception ex) {
@@ -132,7 +132,7 @@ public class MariaDbController {
     }
 
     public void upsertSetting(DatabaseSetting setting) {
-        PreparedStatement insert = createPreparedStatement("INSERT INTO `database_setting` (`key`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), `value`=VALUES(`value`);");
+        PreparedStatement insert = createPreparedStatement("INSERT INTO `setting` (`key`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), `value`=VALUES(`value`);");
         try {
             insert.clearParameters();
             insert.setString(1, setting.getKey());
@@ -147,7 +147,7 @@ public class MariaDbController {
     public DatabaseSetting getSetting(String key) {
         DatabaseSetting setting;
         try {
-            PreparedStatement select = createPreparedStatement("SELECT `key`, `value` FROM `database_setting` WHERE `key`=?;");
+            PreparedStatement select = createPreparedStatement("SELECT `key`, `value` FROM `setting` WHERE `key`=?;");
             select.setString(1, key);
             ResultSet rs = select.executeQuery();
             if (rs.next()) {
@@ -170,7 +170,7 @@ public class MariaDbController {
     }
 
     public void deleteSetting(String key) {
-        PreparedStatement delete = createPreparedStatement("DELETE FROM `database_setting` WHERE `key`=?;");
+        PreparedStatement delete = createPreparedStatement("DELETE FROM `setting` WHERE `key`=?;");
         try {
             delete.setString(1, key);
             delete.execute();
