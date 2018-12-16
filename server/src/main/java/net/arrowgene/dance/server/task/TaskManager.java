@@ -27,10 +27,7 @@ package net.arrowgene.dance.server.task;
 import net.arrowgene.dance.server.DanceServer;
 import net.arrowgene.dance.server.ServerComponent;
 import net.arrowgene.dance.server.client.DanceClient;
-import net.arrowgene.dance.server.task.tasks.CollectGarbage;
-import net.arrowgene.dance.server.task.tasks.WorldSave;
-import net.arrowgene.dance.server.task.tasks.WriteDebugInfo;
-import net.arrowgene.dance.server.task.tasks.WriteProcessInfo;
+import net.arrowgene.dance.server.task.tasks.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,6 +97,7 @@ public class TaskManager extends ServerComponent {
         this.schedules = new HashMap<>();
 
         this.schedule(new WorldSave(super.server));
+        this.schedule(new UpdateStatus(super.server));
         if (super.server.getServerConfig().isDebugMode()) {
             this.schedule(new WriteDebugInfo(super.server));
             this.schedule(new CollectGarbage(super.server));
