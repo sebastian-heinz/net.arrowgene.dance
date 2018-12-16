@@ -49,12 +49,15 @@ import net.arrowgene.dance.server.wedding.LoveMagistrate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DanceServer implements ConnectedListener, DisconnectedListener, ReceivedPacketListener, Thread.UncaughtExceptionHandler {
 
 
     private static final Logger logger = LogManager.getLogger(DanceServer.class);
+
+    public static final SimpleDateFormat MySqlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static long getUnixTimeNow() {
         return GregorianCalendar.getInstance().getTimeInMillis() / 1000;

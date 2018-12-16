@@ -750,4 +750,14 @@ public class SQLiteDb extends Database {
         return success;
     }
 
+    @Override
+    public boolean setSetting(String key, String value) {
+        return true;
+    }
+
+    @Override
+    public String getSetting(String key) {
+        return null;
+    }
+
 }

@@ -41,6 +41,8 @@ import net.arrowgene.dance.library.models.wedding.WeddingRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -747,6 +749,41 @@ public class MariaDb extends Database {
             success = false;
         }
         return success;
+    }
+
+    @Override
+    public boolean setSetting(String key, String value) {
+        try {
+            PreparedStatement upsert = controller.createPreparedStatement(
+                "INSERT INTO `setting` (`key`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);");
+            upsert.setString(1, key);
+            upsert.setString(2, value);
+            upsert.execute();
+            upsert.close();
+        } catch (SQLException e) {
+            logger.error(e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String getSetting(String key) {
+        String value = null;
+        PreparedStatement select = controller.createPreparedStatement("SELECT `value` FROM `setting` WHERE `key`=?;");
+        try {
+            select.setString(1, key);
+            ResultSet rs = select.executeQuery();
+            if (rs.next()) {
+                value = rs.getString(1);
+            }
+            rs.close();
+            select.close();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+
+        return value;
     }
 
 }

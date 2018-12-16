@@ -157,6 +157,10 @@ public abstract class Database {
 
     public abstract boolean deleteWeddingRecords(List<WeddingRecord> weddingRecords);
 
+    public abstract boolean setSetting(String key, String value);
+
+    public abstract String getSetting(String key);
+
     public void syncBuddies(int characterId, List<SocialEntry> buddies) {
 
         List<SocialEntry> dbBuddies = this.getBuddies(characterId);
