@@ -47,7 +47,6 @@ public class UpdateStatus extends Task {
 
     @Override
     public void execute() {
-        String now = DanceServer.MySqlDateFormat.format(new Date());
-        server.getDatabase().setSetting("dance_status", now);
+        server.getDatabase().setSetting("dance_status", Long.toString(DanceServer.getUnixTimeNow()));
     }
 }
